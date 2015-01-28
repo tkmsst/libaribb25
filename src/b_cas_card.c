@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <tchar.h>
 
 #include <math.h>
 
@@ -20,7 +21,7 @@ typedef struct {
 	SCARDHANDLE        card;
 
 	uint8_t           *pool;
-	char              *reader;
+	LPTSTR             reader;
 
 	uint8_t           *sbuf;
 	uint8_t           *rbuf;
@@ -109,7 +110,7 @@ static B_CAS_CARD_PRIVATE_DATA *private_data(void *bcas);
 static void teardown(B_CAS_CARD_PRIVATE_DATA *prv);
 static int change_id_max(B_CAS_CARD_PRIVATE_DATA *prv, int max);
 static int change_pwc_max(B_CAS_CARD_PRIVATE_DATA *prv, int max);
-static int connect_card(B_CAS_CARD_PRIVATE_DATA *prv, const char *reader_name);
+static int connect_card(B_CAS_CARD_PRIVATE_DATA *prv, LPCTSTR reader_name);
 static void extract_power_on_ctrl_response(B_CAS_PWR_ON_CTRL *dst, uint8_t *src);
 static void extract_mjd(int *yy, int *mm, int *dd, int mjd);
 static int setup_ecm_receive_command(uint8_t *dst, uint8_t *src, int len);
@@ -166,7 +167,7 @@ static int init_b_cas_card(void *bcas)
 		return B_CAS_CARD_ERROR_NO_ENOUGH_MEMORY;
 	}
 
-	prv->reader = (char *)(prv->pool);
+	prv->reader = (LPTSTR)(prv->pool);
 	prv->sbuf = prv->pool + len;
 	prv->rbuf = prv->sbuf + B_CAS_BUFFER_MAX;
 	prv->id.data = (int64_t *)(prv->rbuf + B_CAS_BUFFER_MAX);
@@ -183,7 +184,7 @@ static int init_b_cas_card(void *bcas)
 		if(connect_card(prv, prv->reader)){
 			break;
 		}
-		prv->reader += (strlen(prv->reader) + 1);
+		prv->reader += (_tcslen(prv->reader) + 1);
 	}
 
 	if(prv->card == 0){
@@ -525,7 +526,7 @@ static int change_id_max(B_CAS_CARD_PRIVATE_DATA *prv, int max)
 	old_reader = (uint8_t *)(prv->reader);
 	old_pwctrl = (uint8_t *)(prv->pwc.data);
 
-	prv->reader = (char *)p;
+	prv->reader = (LPTSTR)p;
 	prv->sbuf = prv->pool + reader_size;
 	prv->rbuf = prv->sbuf + B_CAS_BUFFER_MAX;
 	prv->id.data = (int64_t *)(prv->rbuf + B_CAS_BUFFER_MAX);
@@ -566,7 +567,7 @@ static int change_pwc_max(B_CAS_CARD_PRIVATE_DATA *prv, int max)
 	old_reader = (uint8_t *)(prv->reader);
 	old_cardid = (uint8_t *)(prv->id.data);
 
-	prv->reader = (char *)p;
+	prv->reader = (LPTSTR)p;
 	prv->sbuf = prv->pool + reader_size;
 	prv->rbuf = prv->sbuf + B_CAS_BUFFER_MAX;
 	prv->id.data = (int64_t *)(prv->rbuf + B_CAS_BUFFER_MAX);
@@ -582,7 +583,7 @@ static int change_pwc_max(B_CAS_CARD_PRIVATE_DATA *prv, int max)
 	return 0;
 }
 
-static int connect_card(B_CAS_CARD_PRIVATE_DATA *prv, const char *reader_name)
+static int connect_card(B_CAS_CARD_PRIVATE_DATA *prv, LPCTSTR reader_name)
 {
 	int m,n;
 	
