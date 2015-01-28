@@ -6,7 +6,7 @@
 
 typedef struct {
 	uint8_t *data;
-	int32_t  size;
+	uint32_t  size;
 } ARIB_STD_B25_BUFFER;
 
 typedef struct {

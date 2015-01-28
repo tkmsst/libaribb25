@@ -91,7 +91,7 @@ typedef struct {
 
 	int32_t            unit_size;
 
-	int32_t            sbuf_offset;
+	intptr_t           sbuf_offset;
 
 	TS_SECTION_PARSER *pat;
 	TS_SECTION_PARSER *cat;
@@ -398,7 +398,7 @@ static TS_STREAM_ELEM *create_stream_elem(int32_t pid, int32_t type);
 static void put_stream_list_tail(TS_STREAM_LIST *list, TS_STREAM_ELEM *elem);
 static void clear_stream_list(TS_STREAM_LIST *list);
 
-static int reserve_work_buffer(TS_WORK_BUFFER *buf, int32_t size);
+static int reserve_work_buffer(TS_WORK_BUFFER *buf, intptr_t size);
 static int append_work_buffer(TS_WORK_BUFFER *buf, uint8_t *data, int32_t size);
 static void reset_work_buffer(TS_WORK_BUFFER *buf);
 static void release_work_buffer(TS_WORK_BUFFER *buf);
@@ -513,7 +513,7 @@ static int reset_arib_std_b25(void *std_b25)
 static int flush_arib_std_b25(void *std_b25)
 {
 	int r,l;
-	int m,n;
+	intptr_t m,n;
 
 	int32_t crypt;
 	int32_t unit;
@@ -1039,7 +1039,8 @@ static void teardown(ARIB_STD_B25_PRIVATE_DATA *prv)
 static int select_unit_size(ARIB_STD_B25_PRIVATE_DATA *prv)
 {
 	int i;
-	int m,n,w;
+	intptr_t m,w;
+	int n;
 	int count[320-188];
 
 	unsigned char *head;
@@ -1102,7 +1103,8 @@ static int select_unit_size(ARIB_STD_B25_PRIVATE_DATA *prv)
 static int find_pat(ARIB_STD_B25_PRIVATE_DATA *prv)
 {
 	int r;
-	int n,size;
+	int n;
+	intptr_t size;
 
 	int32_t unit;
 
@@ -1183,8 +1185,8 @@ static int proc_pat(ARIB_STD_B25_PRIVATE_DATA *prv)
 {
 	int r;
 	int i,n;
-	int len;
-	int count;
+	intptr_t len;
+	intptr_t count;
 
 	int32_t program_number;
 	int32_t pid;
@@ -1299,7 +1301,8 @@ static int check_pmt_complete(ARIB_STD_B25_PRIVATE_DATA *prv)
 static int find_pmt(ARIB_STD_B25_PRIVATE_DATA *prv)
 {
 	int r;
-	int n,size;
+	int n;
+	intptr_t size;
 
 	int32_t unit;
 
@@ -1671,7 +1674,8 @@ static int check_ecm_complete(ARIB_STD_B25_PRIVATE_DATA *prv)
 static int find_ecm(ARIB_STD_B25_PRIVATE_DATA *prv)
 {
 	int r;
-	int n,size;
+	int n;
+	intptr_t size;
 
 	int32_t unit;
 
@@ -1815,7 +1819,7 @@ LAST:
 static int proc_ecm(DECRYPTOR_ELEM *dec, B_CAS_CARD *bcas, int32_t multi2_round)
 {
 	int r,n;
-	int length;
+	uint32_t length;
 
 	uint8_t *p;
 
@@ -1963,7 +1967,7 @@ static void dump_pts(uint8_t *src, int32_t crypt)
 static int proc_arib_std_b25(ARIB_STD_B25_PRIVATE_DATA *prv)
 {
 	int r;
-	int m,n;
+	intptr_t m,n;
 
 	int32_t crypt;
 	int32_t unit;
@@ -2650,9 +2654,10 @@ static void clear_stream_list(TS_STREAM_LIST *list)
 	list->count = 0;
 }
 
-static int reserve_work_buffer(TS_WORK_BUFFER *buf, int32_t size)
+static int reserve_work_buffer(TS_WORK_BUFFER *buf, intptr_t size)
 {
-	int m,n;
+	intptr_t m;
+	int n;
 	uint8_t *p;
 
 	if(buf->max >= size){
@@ -2694,7 +2699,7 @@ static int reserve_work_buffer(TS_WORK_BUFFER *buf, int32_t size)
 
 static int append_work_buffer(TS_WORK_BUFFER *buf, uint8_t *data, int32_t size)
 {
-	int m;
+	intptr_t m;
 
 	if(size < 1){
 		/* ignore - do nothing */
@@ -2786,7 +2791,8 @@ static uint8_t *resync(uint8_t *head, uint8_t *tail, int32_t unit_size)
 
 static uint8_t *resync_force(uint8_t *head, uint8_t *tail, int32_t unit_size)
 {
-	int i,n;
+	int i;
+	intptr_t n;
 	unsigned char *buf;
 
 	buf = head;

@@ -503,8 +503,8 @@ static void teardown(B_CAS_CARD_PRIVATE_DATA *prv)
 
 static int change_id_max(B_CAS_CARD_PRIVATE_DATA *prv, int max)
 {
-	int m;
-	int reader_size;
+	intptr_t m;
+	intptr_t reader_size;
 	int pwctrl_size;
 	
 	uint8_t *p;
@@ -544,8 +544,8 @@ static int change_id_max(B_CAS_CARD_PRIVATE_DATA *prv, int max)
 
 static int change_pwc_max(B_CAS_CARD_PRIVATE_DATA *prv, int max)
 {
-	int m;
-	int reader_size;
+	intptr_t m;
+	intptr_t reader_size;
 	int cardid_size;
 	
 	uint8_t *p;

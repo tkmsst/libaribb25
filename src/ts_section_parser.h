@@ -17,7 +17,7 @@ typedef struct {
 
 	int (* reset)(void *parser);
 
-	int (* put)(void *parser, TS_HEADER *hdr, uint8_t *data, int size);
+	int (* put)(void *parser, TS_HEADER *hdr, uint8_t *data, intptr_t size);
 	int (* get)(void *parser, TS_SECTION *sect);
 	int (* ret)(void *parser, TS_SECTION *sect);
 

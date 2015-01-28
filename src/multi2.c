@@ -72,7 +72,7 @@ static int set_init_cbc_multi2(void *m2, uint8_t *val);
 static int set_scramble_key_multi2(void *m2, uint8_t *val);
 static int clear_scramble_key_multi2(void *m2);
 static int encrypt_multi2(void *m2, int32_t type, uint8_t *buf, int32_t size);
-static int decrypt_multi2(void *m2, int32_t type, uint8_t *buf, int32_t size);
+static int decrypt_multi2(void *m2, int32_t type, uint8_t *buf, intptr_t size);
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  global function implementation
@@ -325,7 +325,7 @@ static int encrypt_multi2(void *m2, int32_t type, uint8_t *buf, int32_t size)
 	return 0;
 }
 
-static int decrypt_multi2(void *m2, int32_t type, uint8_t *buf, int32_t size)
+static int decrypt_multi2(void *m2, int32_t type, uint8_t *buf, intptr_t size)
 {
 	CORE_DATA src,dst,cbc;
 	CORE_PARAM *prm;

@@ -44,7 +44,7 @@ typedef struct {
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 static void release_ts_section_parser(void *parser);
 static int reset_ts_section_parser(void *parser);
-static int put_ts_section_parser(void *parser, TS_HEADER *hdr, uint8_t *data, int size);
+static int put_ts_section_parser(void *parser, TS_HEADER *hdr, uint8_t *data, intptr_t size);
 static int get_ts_section_parser(void *parser, TS_SECTION *sect);
 static int ret_ts_section_parser(void *parser, TS_SECTION *sect);
 static int get_count_ts_section_parser(void *parser);
@@ -94,11 +94,11 @@ TS_SECTION_PARSER *create_ts_section_parser()
 static TS_SECTION_PARSER_PRIVATE_DATA *private_data(void *parser);
 static void teardown(TS_SECTION_PARSER_PRIVATE_DATA *prv);
 
-static int put_exclude_section_start(TS_SECTION_PARSER_PRIVATE_DATA *prv, uint8_t *data, int size);
-static int put_include_section_start(TS_SECTION_PARSER_PRIVATE_DATA *prv, uint8_t *data, int size);
+static int put_exclude_section_start(TS_SECTION_PARSER_PRIVATE_DATA *prv, uint8_t *data, intptr_t size);
+static int put_include_section_start(TS_SECTION_PARSER_PRIVATE_DATA *prv, uint8_t *data, intptr_t size);
 
 static void reset_section(TS_SECTION *sect);
-static void append_section_data(TS_SECTION *sect, uint8_t *data, int size);
+static void append_section_data(TS_SECTION *sect, uint8_t *data, intptr_t size);
 static int check_section_complete(TS_SECTION *sect);
 
 static int compare_elem_section(TS_SECTION_ELEM *a, TS_SECTION_ELEM *b);
@@ -152,7 +152,7 @@ static int reset_ts_section_parser(void *parser)
 	return 0;
 }
 
-static int put_ts_section_parser(void *parser, TS_HEADER *hdr, uint8_t *data, int size)
+static int put_ts_section_parser(void *parser, TS_HEADER *hdr, uint8_t *data, intptr_t size)
 {
 	TS_SECTION_PARSER_PRIVATE_DATA *prv;
 	
@@ -287,7 +287,7 @@ static void teardown(TS_SECTION_PARSER_PRIVATE_DATA *prv)
 	memset(&(prv->stat), 0, sizeof(TS_SECTION_PARSER_STAT));
 }
 
-static int put_exclude_section_start(TS_SECTION_PARSER_PRIVATE_DATA *prv, uint8_t *data, int size)
+static int put_exclude_section_start(TS_SECTION_PARSER_PRIVATE_DATA *prv, uint8_t *data, intptr_t size)
 {
 	TS_SECTION_ELEM *w;
 
@@ -321,7 +321,7 @@ static int put_exclude_section_start(TS_SECTION_PARSER_PRIVATE_DATA *prv, uint8_
 	return 0;
 }
 
-static int put_include_section_start(TS_SECTION_PARSER_PRIVATE_DATA *prv, uint8_t *data, int size)
+static int put_include_section_start(TS_SECTION_PARSER_PRIVATE_DATA *prv, uint8_t *data, intptr_t size)
 {
 	TS_SECTION_ELEM *w;
 	
@@ -331,7 +331,7 @@ static int put_include_section_start(TS_SECTION_PARSER_PRIVATE_DATA *prv, uint8_
 	uint8_t *tail;
 
 	int r;
-	int length;
+	intptr_t length;
 
 	p = data;
 	tail = p + size;
@@ -415,9 +415,9 @@ static void reset_section(TS_SECTION *sect)
 	sect->data = NULL;
 }
 
-static void append_section_data(TS_SECTION *sect, uint8_t *data, int size)
+static void append_section_data(TS_SECTION *sect, uint8_t *data, intptr_t size)
 {
-	int m,n;
+	intptr_t m,n;
 	
 	m = sect->tail - sect->raw;
 	n = MAX_RAW_SECTION_SIZE - m;
@@ -448,7 +448,8 @@ static void append_section_data(TS_SECTION *sect, uint8_t *data, int size)
 
 static int check_section_complete(TS_SECTION *sect)
 {
-	int m,n;
+	intptr_t m;
+	int n;
 	
 	if(sect->data == NULL){
 		return 0;
@@ -466,7 +467,7 @@ static int check_section_complete(TS_SECTION *sect)
 
 static int compare_elem_section(TS_SECTION_ELEM *a, TS_SECTION_ELEM *b)
 {
-	int m,n;
+	intptr_t m,n;
 	
 	if( (a == NULL) || (b == NULL) ){
 		return 1;
@@ -546,7 +547,7 @@ static TS_SECTION_ELEM *query_work_elem(TS_SECTION_PARSER_PRIVATE_DATA *prv)
 
 static void extract_ts_section_header(TS_SECTION *sect)
 {
-	int size;
+	intptr_t size;
 	uint8_t *p;
 	
 	sect->data = NULL;

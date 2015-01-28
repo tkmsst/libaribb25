@@ -18,7 +18,7 @@ typedef struct {
 	int (* clear_scramble_key)(void *m2);
 
 	int (* encrypt)(void *m2, int32_t type, uint8_t *buf, int32_t size);
-	int (* decrypt)(void *m2, int32_t type, uint8_t *buf, int32_t size);
+	int (* decrypt)(void *m2, int32_t type, uint8_t *buf, intptr_t size);
 
 } MULTI2;
 
