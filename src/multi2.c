@@ -44,14 +44,14 @@ typedef struct {
 	int32_t    ref_count;
 
 	CORE_DATA  cbc_init;
-	
+
 	CORE_PARAM sys;
 	CORE_DATA  scr[2]; /* 0: odd, 1: even */
 	CORE_PARAM wrk[2]; /* 0: odd, 1: even */
 
 	uint32_t   round;
 	uint32_t   state;
-	
+
 } MULTI2_PRIVATE_DATA;
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -77,16 +77,16 @@ static int decrypt_multi2(void *m2, int32_t type, uint8_t *buf, intptr_t size);
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  global function implementation
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-MULTI2 *create_multi2()
+MULTI2 *create_multi2(void)
 {
 	int n;
-	
+
 	MULTI2 *r;
 	MULTI2_PRIVATE_DATA *prv;
 
 	n  = sizeof(MULTI2_PRIVATE_DATA);
 	n += sizeof(MULTI2);
-	
+
 	prv = (MULTI2_PRIVATE_DATA *)calloc(1, n);
 	if(prv == NULL){
 		return NULL;
@@ -178,7 +178,7 @@ static int set_system_key_multi2(void *m2, uint8_t *val)
 {
 	int i;
 	uint8_t *p;
-	
+
 	MULTI2_PRIVATE_DATA *prv;
 
 	prv = private_data(m2);
@@ -199,7 +199,7 @@ static int set_system_key_multi2(void *m2, uint8_t *val)
 static int set_init_cbc_multi2(void *m2, uint8_t *val)
 {
 	uint8_t *p;
-	
+
 	MULTI2_PRIVATE_DATA *prv;
 
 	prv = private_data(m2);
@@ -220,7 +220,7 @@ static int set_init_cbc_multi2(void *m2, uint8_t *val)
 static int set_scramble_key_multi2(void *m2, uint8_t *val)
 {
 	uint8_t *p;
-	
+
 	MULTI2_PRIVATE_DATA *prv;
 
 	prv = private_data(m2);
@@ -234,7 +234,7 @@ static int set_scramble_key_multi2(void *m2, uint8_t *val)
 	p = load_be_uint32(&(prv->scr[0].r), p);
 	p = load_be_uint32(&(prv->scr[1].l), p);
 	p = load_be_uint32(&(prv->scr[1].r), p);
-	
+
 	core_schedule(prv->wrk+0, &(prv->sys), prv->scr+0);
 	core_schedule(prv->wrk+1, &(prv->sys), prv->scr+1);
 
@@ -285,7 +285,7 @@ static int encrypt_multi2(void *m2, int32_t type, uint8_t *buf, int32_t size)
 			return MULTI2_ERROR_UNSET_SCRAMBLE_KEY;
 		}
 	}
-	
+
 	if(type == 0x02){
 		prm = prv->wrk+1;
 	}else{
@@ -310,7 +310,7 @@ static int encrypt_multi2(void *m2, int32_t type, uint8_t *buf, int32_t size)
 	if(size > 0){
 		int i;
 		uint8_t tmp[8];
-		
+
 		src.l = dst.l;
 		src.r = dst.r;
 		core_encrypt(&dst, &src, prm, prv->round);
@@ -350,7 +350,7 @@ static int decrypt_multi2(void *m2, int32_t type, uint8_t *buf, intptr_t size)
 			return MULTI2_ERROR_UNSET_SCRAMBLE_KEY;
 		}
 	}
-	
+
 	if(type == 0x02){
 		prm = prv->wrk+1;
 	}else{
@@ -377,7 +377,7 @@ static int decrypt_multi2(void *m2, int32_t type, uint8_t *buf, intptr_t size)
 	if(size > 0){
 		int i;
 		uint8_t tmp[8];
-		
+
 		core_encrypt(&dst, &cbc, prm, prv->round);
 		save_be_uint32(tmp+0, dst.l);
 		save_be_uint32(tmp+4, dst.r);
@@ -416,13 +416,13 @@ static void core_schedule(CORE_PARAM *work, CORE_PARAM *skey, CORE_DATA *dkey)
 	CORE_DATA b1,b2,b3,b4,b5,b6,b7,b8,b9;
 
 	core_pi1(&b1, dkey);
-	
+
 	core_pi2(&b2, &b1, skey->key[0]);
 	work->key[0] = b2.l;
-	
+
 	core_pi3(&b3, &b2, skey->key[1], skey->key[2]);
 	work->key[1] = b3.r;
-	
+
 	core_pi4(&b4, &b3, skey->key[3]);
 	work->key[2] = b4.l;
 
@@ -445,9 +445,9 @@ static void core_schedule(CORE_PARAM *work, CORE_PARAM *skey, CORE_DATA *dkey)
 static void core_encrypt(CORE_DATA *dst, CORE_DATA *src, CORE_PARAM *w, int32_t round)
 {
 	int32_t i;
-	
+
 	CORE_DATA tmp;
-	
+
 	dst->l = src->l;
 	dst->r = src->r;
 	for(i=0;i<round;i++){
@@ -465,7 +465,7 @@ static void core_encrypt(CORE_DATA *dst, CORE_DATA *src, CORE_PARAM *w, int32_t 
 static void core_decrypt(CORE_DATA *dst, CORE_DATA *src, CORE_PARAM *w, int32_t round)
 {
 	int32_t i;
-	
+
 	CORE_DATA tmp;
 
 	dst->l = src->l;

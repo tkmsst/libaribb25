@@ -16,7 +16,7 @@
  inner structures
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
 typedef struct {
-	
+
 	SCARDCONTEXT       mng;
 	SCARDHANDLE        card;
 
@@ -27,13 +27,13 @@ typedef struct {
 	uint8_t           *rbuf;
 
 	B_CAS_INIT_STATUS  stat;
-	
+
 	B_CAS_ID           id;
 	int32_t            id_max;
 
 	B_CAS_PWR_ON_CTRL_INFO pwc;
 	int32_t            pwc_max;
-	
+
 } B_CAS_CARD_PRIVATE_DATA;
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -69,16 +69,16 @@ static int init_b_cas_card(void *bcas);
 static int get_init_status_b_cas_card(void *bcas, B_CAS_INIT_STATUS *stat);
 static int get_id_b_cas_card(void *bcas, B_CAS_ID *dst);
 static int get_pwr_on_ctrl_b_cas_card(void *bcas, B_CAS_PWR_ON_CTRL_INFO *dst);
-static int proc_ecm_b_cas_card(void *bcas, B_CAS_ECM_RESULT *dst, uint8_t *src, int len);
-static int proc_emm_b_cas_card(void *bcas, uint8_t *src, int len);
+static int proc_ecm_b_cas_card(void *bcas, B_CAS_ECM_RESULT *dst, uint8_t *src, int32_t len);
+static int proc_emm_b_cas_card(void *bcas, uint8_t *src, int32_t len);
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  global function implementation
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++*/
-B_CAS_CARD *create_b_cas_card()
+B_CAS_CARD *create_b_cas_card(void)
 {
 	int n;
-	
+
 	B_CAS_CARD *r;
 	B_CAS_CARD_PRIVATE_DATA *prv;
 
@@ -140,7 +140,7 @@ static int init_b_cas_card(void *bcas)
 	int m;
 	LONG ret;
 	DWORD len;
-	
+
 	B_CAS_CARD_PRIVATE_DATA *prv;
 
 	prv = private_data(bcas);
@@ -160,15 +160,15 @@ static int init_b_cas_card(void *bcas)
 		return B_CAS_CARD_ERROR_NO_SMART_CARD_READER;
 	}
 	len += 256;
-	
-	m = len + (2*B_CAS_BUFFER_MAX) + (sizeof(int64_t)*16) + (sizeof(B_CAS_PWR_ON_CTRL)*16);
+
+	m = (sizeof(TCHAR)*len) + (2*B_CAS_BUFFER_MAX) + (sizeof(int64_t)*16) + (sizeof(B_CAS_PWR_ON_CTRL)*16);
 	prv->pool = (uint8_t *)malloc(m);
 	if(prv->pool == NULL){
 		return B_CAS_CARD_ERROR_NO_ENOUGH_MEMORY;
 	}
 
 	prv->reader = (LPTSTR)(prv->pool);
-	prv->sbuf = prv->pool + len;
+	prv->sbuf = (uint8_t *)(prv->reader + len);
 	prv->rbuf = prv->sbuf + B_CAS_BUFFER_MAX;
 	prv->id.data = (int64_t *)(prv->rbuf + B_CAS_BUFFER_MAX);
 	prv->id_max = 16;
@@ -215,7 +215,7 @@ static int get_init_status_b_cas_card(void *bcas, B_CAS_INIT_STATUS *stat)
 static int get_id_b_cas_card(void *bcas, B_CAS_ID *dst)
 {
 	LONG ret;
-	
+
 	DWORD slen;
 	DWORD rlen;
 
@@ -223,9 +223,8 @@ static int get_id_b_cas_card(void *bcas, B_CAS_ID *dst)
 
 	uint8_t *p;
 	uint8_t *tail;
-	
+
 	B_CAS_CARD_PRIVATE_DATA *prv;
-	SCARD_IO_REQUEST sir;
 
 	prv = private_data(bcas);
 	if( (prv == NULL) || (dst == NULL) ){
@@ -238,10 +237,9 @@ static int get_id_b_cas_card(void *bcas, B_CAS_ID *dst)
 
 	slen = sizeof(CARD_ID_INFORMATION_ACQUIRE_CMD);
 	memcpy(prv->sbuf, CARD_ID_INFORMATION_ACQUIRE_CMD, slen);
-	memcpy(&sir, SCARD_PCI_T1, sizeof(sir));
 	rlen = B_CAS_BUFFER_MAX;
 
-	ret = SCardTransmit(prv->card, SCARD_PCI_T1, prv->sbuf, slen, &sir, prv->rbuf, &rlen);
+	ret = SCardTransmit(prv->card, SCARD_PCI_T1, prv->sbuf, slen, NULL, prv->rbuf, &rlen);
 	if( (ret != SCARD_S_SUCCESS) || (rlen < 19) ){
 		return B_CAS_CARD_ERROR_TRANSMIT_FAILED;
 	}
@@ -258,24 +256,24 @@ static int get_id_b_cas_card(void *bcas, B_CAS_ID *dst)
 			return B_CAS_CARD_ERROR_NO_ENOUGH_MEMORY;
 		}
 	}
-	
+
 	p += 1;
 	for(i=0;i<num;i++){
 		if( p+10 > tail ){
 			return B_CAS_CARD_ERROR_TRANSMIT_FAILED;
 		}
-		
+
 		{
 			int maker_id;
 			int version;
 			int check_code;
-			
+
 			maker_id = p[0];
 			version = p[1];
 			prv->id.data[i] = load_be_uint48(p+2);
 			check_code = load_be_uint16(p+8);
 		}
-		
+
 		p += 10;
 	}
 
@@ -289,14 +287,13 @@ static int get_id_b_cas_card(void *bcas, B_CAS_ID *dst)
 static int get_pwr_on_ctrl_b_cas_card(void *bcas, B_CAS_PWR_ON_CTRL_INFO *dst)
 {
 	LONG ret;
-	
+
 	DWORD slen;
 	DWORD rlen;
 
 	int i,num,code;
 
 	B_CAS_CARD_PRIVATE_DATA *prv;
-	SCARD_IO_REQUEST sir;
 
 	memset(dst, 0, sizeof(B_CAS_PWR_ON_CTRL_INFO));
 
@@ -312,10 +309,9 @@ static int get_pwr_on_ctrl_b_cas_card(void *bcas, B_CAS_PWR_ON_CTRL_INFO *dst)
 	slen = sizeof(POWER_ON_CONTROL_INFORMATION_REQUEST_CMD);
 	memcpy(prv->sbuf, POWER_ON_CONTROL_INFORMATION_REQUEST_CMD, slen);
 	prv->sbuf[5] = 0;
-	memcpy(&sir, SCARD_PCI_T1, sizeof(sir));
 	rlen = B_CAS_BUFFER_MAX;
 
-	ret = SCardTransmit(prv->card, SCARD_PCI_T1, prv->sbuf, slen, &sir, prv->rbuf, &rlen);
+	ret = SCardTransmit(prv->card, SCARD_PCI_T1, prv->sbuf, slen, NULL, prv->rbuf, &rlen);
 	if( (ret != SCARD_S_SUCCESS) || (rlen < 18) || (prv->rbuf[6] != 0) ){
 		return B_CAS_CARD_ERROR_TRANSMIT_FAILED;
 	}
@@ -338,10 +334,10 @@ static int get_pwr_on_ctrl_b_cas_card(void *bcas, B_CAS_PWR_ON_CTRL_INFO *dst)
 	extract_power_on_ctrl_response(prv->pwc.data+0, prv->rbuf);
 
 	for(i=1;i<num;i++){
-		prv->sbuf[5] = i;
+		prv->sbuf[5] = (uint8_t)i;
 		rlen = B_CAS_BUFFER_MAX;
 
-		ret = SCardTransmit(prv->card, SCARD_PCI_T1, prv->sbuf, slen, &sir, prv->rbuf, &rlen);
+		ret = SCardTransmit(prv->card, SCARD_PCI_T1, prv->sbuf, slen, NULL, prv->rbuf, &rlen);
 		if( (ret != SCARD_S_SUCCESS) || (rlen < 18) || (prv->rbuf[6] != i) ){
 			return B_CAS_CARD_ERROR_TRANSMIT_FAILED;
 		}
@@ -359,14 +355,12 @@ static int get_pwr_on_ctrl_b_cas_card(void *bcas, B_CAS_PWR_ON_CTRL_INFO *dst)
 static int proc_ecm_b_cas_card(void *bcas, B_CAS_ECM_RESULT *dst, uint8_t *src, int len)
 {
 	int retry_count;
-	
+
 	LONG ret;
 	DWORD slen;
 	DWORD rlen;
-	
-	B_CAS_CARD_PRIVATE_DATA *prv;
 
-	SCARD_IO_REQUEST sir;
+	B_CAS_CARD_PRIVATE_DATA *prv;
 
 	prv = private_data(bcas);
 	if( (prv == NULL) ||
@@ -381,21 +375,19 @@ static int proc_ecm_b_cas_card(void *bcas, B_CAS_ECM_RESULT *dst, uint8_t *src, 
 	}
 
 	slen = setup_ecm_receive_command(prv->sbuf, src, len);
-	memcpy(&sir, SCARD_PCI_T1, sizeof(sir));
 	rlen = B_CAS_BUFFER_MAX;
 
 	retry_count = 0;
-	ret = SCardTransmit(prv->card, SCARD_PCI_T1, prv->sbuf, slen, &sir, prv->rbuf, &rlen);
-	while( ((ret != SCARD_S_SUCCESS) || (rlen < 25)) && (retry_count < 10) ){
+	ret = SCardTransmit(prv->card, SCARD_PCI_T1, prv->sbuf, slen, NULL, prv->rbuf, &rlen);
+	while( ((ret != SCARD_S_SUCCESS) || (rlen < 25)) && (retry_count < 2) ){
 		retry_count += 1;
-		if(!connect_card(prv, prv->reader)){
-			continue;
-		}
-		slen = setup_ecm_receive_command(prv->sbuf, src, len);
-		memcpy(&sir, SCARD_PCI_T1, sizeof(sir));
+//		if(!connect_card(prv, prv->reader)){
+//			continue;
+//		}
+//		slen = setup_ecm_receive_command(prv->sbuf, src, len);
 		rlen = B_CAS_BUFFER_MAX;
 
-		ret = SCardTransmit(prv->card, SCARD_PCI_T1, prv->sbuf, slen, &sir, prv->rbuf, &rlen);
+		ret = SCardTransmit(prv->card, SCARD_PCI_T1, prv->sbuf, slen, NULL, prv->rbuf, &rlen);
 	}
 
 	if( (ret != SCARD_S_SUCCESS) || (rlen < 25) ){
@@ -411,14 +403,12 @@ static int proc_ecm_b_cas_card(void *bcas, B_CAS_ECM_RESULT *dst, uint8_t *src, 
 static int proc_emm_b_cas_card(void *bcas, uint8_t *src, int len)
 {
 	int retry_count;
-	
+
 	LONG ret;
 	DWORD slen;
 	DWORD rlen;
-	
-	B_CAS_CARD_PRIVATE_DATA *prv;
 
-	SCARD_IO_REQUEST sir;
+	B_CAS_CARD_PRIVATE_DATA *prv;
 
 	prv = private_data(bcas);
 	if( (prv == NULL) ||
@@ -432,21 +422,19 @@ static int proc_emm_b_cas_card(void *bcas, uint8_t *src, int len)
 	}
 
 	slen = setup_emm_receive_command(prv->sbuf, src, len);
-	memcpy(&sir, SCARD_PCI_T1, sizeof(sir));
 	rlen = B_CAS_BUFFER_MAX;
 
 	retry_count = 0;
-	ret = SCardTransmit(prv->card, SCARD_PCI_T1, prv->sbuf, slen, &sir, prv->rbuf, &rlen);
+	ret = SCardTransmit(prv->card, SCARD_PCI_T1, prv->sbuf, slen, NULL, prv->rbuf, &rlen);
 	while( ((ret != SCARD_S_SUCCESS) || (rlen < 6)) && (retry_count < 2) ){
 		retry_count += 1;
-		if(!connect_card(prv, prv->reader)){
-			continue;
-		}
-		slen = setup_emm_receive_command(prv->sbuf, src, len);
-		memcpy(&sir, SCARD_PCI_T1, sizeof(sir));
+//		if(!connect_card(prv, prv->reader)){
+//			continue;
+//		}
+//		slen = setup_emm_receive_command(prv->sbuf, src, len);
 		rlen = B_CAS_BUFFER_MAX;
 
-		ret = SCardTransmit(prv->card, SCARD_PCI_T1, prv->sbuf, slen, &sir, prv->rbuf, &rlen);
+		ret = SCardTransmit(prv->card, SCARD_PCI_T1, prv->sbuf, slen, NULL, prv->rbuf, &rlen);
 	}
 
 	if( (ret != SCARD_S_SUCCESS) || (rlen < 6) ){
@@ -506,7 +494,7 @@ static int change_id_max(B_CAS_CARD_PRIVATE_DATA *prv, int max)
 	intptr_t m;
 	intptr_t reader_size;
 	int pwctrl_size;
-	
+
 	uint8_t *p;
 	uint8_t *old_reader;
 	uint8_t *old_pwctrl;
@@ -527,7 +515,7 @@ static int change_id_max(B_CAS_CARD_PRIVATE_DATA *prv, int max)
 	old_pwctrl = (uint8_t *)(prv->pwc.data);
 
 	prv->reader = (LPTSTR)p;
-	prv->sbuf = prv->pool + reader_size;
+	prv->sbuf = p + reader_size;
 	prv->rbuf = prv->sbuf + B_CAS_BUFFER_MAX;
 	prv->id.data = (int64_t *)(prv->rbuf + B_CAS_BUFFER_MAX);
 	prv->id_max = max;
@@ -535,7 +523,7 @@ static int change_id_max(B_CAS_CARD_PRIVATE_DATA *prv, int max)
 
 	memcpy(prv->reader, old_reader, reader_size);
 	memcpy(prv->pwc.data, old_pwctrl, pwctrl_size);
-	
+
 	free(prv->pool);
 	prv->pool = p;
 
@@ -547,7 +535,7 @@ static int change_pwc_max(B_CAS_CARD_PRIVATE_DATA *prv, int max)
 	intptr_t m;
 	intptr_t reader_size;
 	int cardid_size;
-	
+
 	uint8_t *p;
 	uint8_t *old_reader;
 	uint8_t *old_cardid;
@@ -568,7 +556,7 @@ static int change_pwc_max(B_CAS_CARD_PRIVATE_DATA *prv, int max)
 	old_cardid = (uint8_t *)(prv->id.data);
 
 	prv->reader = (LPTSTR)p;
-	prv->sbuf = prv->pool + reader_size;
+	prv->sbuf = p + reader_size;
 	prv->rbuf = prv->sbuf + B_CAS_BUFFER_MAX;
 	prv->id.data = (int64_t *)(prv->rbuf + B_CAS_BUFFER_MAX);
 	prv->pwc.data = (B_CAS_PWR_ON_CTRL *)(prv->id.data + prv->id_max);
@@ -576,7 +564,7 @@ static int change_pwc_max(B_CAS_CARD_PRIVATE_DATA *prv, int max)
 
 	memcpy(prv->reader, old_reader, reader_size);
 	memcpy(prv->id.data, old_cardid, cardid_size);
-	
+
 	free(prv->pool);
 	prv->pool = p;
 
@@ -586,13 +574,11 @@ static int change_pwc_max(B_CAS_CARD_PRIVATE_DATA *prv, int max)
 static int connect_card(B_CAS_CARD_PRIVATE_DATA *prv, LPCTSTR reader_name)
 {
 	int m,n;
-	
+
 	LONG ret;
 	DWORD rlen,protocol;
 
 	uint8_t *p;
-	
-	SCARD_IO_REQUEST sir;
 
 	if(prv->card != 0){
 		SCardDisconnect(prv->card, SCARD_RESET_CARD);
@@ -606,9 +592,8 @@ static int connect_card(B_CAS_CARD_PRIVATE_DATA *prv, LPCTSTR reader_name)
 
 	m = sizeof(INITIAL_SETTING_CONDITIONS_CMD);
 	memcpy(prv->sbuf, INITIAL_SETTING_CONDITIONS_CMD, m);
-	memcpy(&sir, SCARD_PCI_T1, sizeof(sir));
 	rlen = B_CAS_BUFFER_MAX;
-	ret = SCardTransmit(prv->card, SCARD_PCI_T1, prv->sbuf, m, &sir, prv->rbuf, &rlen);
+	ret = SCardTransmit(prv->card, SCARD_PCI_T1, prv->sbuf, m, NULL, prv->rbuf, &rlen);
 	if(ret != SCARD_S_SUCCESS){
 		return 0;
 	}
@@ -616,7 +601,7 @@ static int connect_card(B_CAS_CARD_PRIVATE_DATA *prv, LPCTSTR reader_name)
 	if(rlen < 57){
 		return 0;
 	}
-	
+
 	p = prv->rbuf;
 
 	n = load_be_uint16(p+4);
@@ -638,8 +623,7 @@ static void extract_power_on_ctrl_response(B_CAS_PWR_ON_CTRL *dst, uint8_t *src)
 	int referrence;
 	int start;
 	int limit;
-	
-	
+
 	dst->broadcaster_group_id = src[8];
 	referrence = (src[9]<<8)|src[10];
 	start = referrence - src[11];
@@ -651,7 +635,6 @@ static void extract_power_on_ctrl_response(B_CAS_PWR_ON_CTRL *dst, uint8_t *src)
 	dst->hold_time = src[13];
 	dst->network_id = (src[14]<<8)|src[15];
 	dst->transport_id = (src[16]<<8)|src[17];
-	
 }
 
 static void extract_mjd(int *yy, int *mm, int *dd, int mjd)
@@ -663,7 +646,7 @@ static void extract_mjd(int *yy, int *mm, int *dd, int mjd)
 	int mw;
 	int dw;
 	int yw;
-	
+
 	mjd -= 51604; // 2000,3/1
 	if(mjd < 0){
 		mjd += 0x10000;
@@ -680,7 +663,7 @@ static void extract_mjd(int *yy, int *mm, int *dd, int mjd)
 		a4 = 3;
 	}
 	m4 = m3 - (a4 * 365);
-	
+
 	mw = (1071*m4+450) >> 15;
 	dw = m4 - ((979*mw+16) >> 5);
 
@@ -700,7 +683,7 @@ static void extract_mjd(int *yy, int *mm, int *dd, int mjd)
 static int setup_ecm_receive_command(uint8_t *dst, uint8_t *src, int len)
 {
 	int r;
-	
+
 	r  = sizeof(ECM_RECEIVE_CMD_HEADER);
 	memcpy(dst+0, ECM_RECEIVE_CMD_HEADER, r);
 	dst[r] = (uint8_t)(len & 0xff);
@@ -747,4 +730,3 @@ static int64_t load_be_uint48(uint8_t *p)
 
 	return r;
 }
-

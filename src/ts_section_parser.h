@@ -22,16 +22,16 @@ typedef struct {
 	int (* ret)(void *parser, TS_SECTION *sect);
 
 	int (* get_count)(void *parser);
-	
+
 	int (* get_stat)(void *parser, TS_SECTION_PARSER_STAT *stat);
-	
+
 } TS_SECTION_PARSER;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern TS_SECTION_PARSER *create_ts_section_parser();
+extern TS_SECTION_PARSER *create_ts_section_parser(void);
 
 #ifdef __cplusplus
 }

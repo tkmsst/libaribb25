@@ -26,7 +26,7 @@ typedef struct {
 extern "C" {
 #endif
 
-extern MULTI2 *create_multi2();
+extern MULTI2 *create_multi2(void);
 
 #ifdef __cplusplus
 }

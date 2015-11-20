@@ -12,7 +12,7 @@ typedef struct {
 typedef struct {
 
 	int32_t  program_number; /* channel */
-	
+
 	int32_t  ecm_unpurchased_count;
 	int32_t  last_ecm_error_code;
 
@@ -20,7 +20,7 @@ typedef struct {
 
 	int64_t  total_packet_count;
 	int64_t  undecrypted_packet_count;
-	
+
 } ARIB_STD_B25_PROGRAM_INFO;
 
 typedef struct {
@@ -32,9 +32,9 @@ typedef struct {
 	int (* set_multi2_round)(void *std_b25, int32_t round);
 	int (* set_strip)(void *std_b25, int32_t strip);
 	int (* set_emm_proc)(void *std_b25, int32_t on);
-	
+
 	int (* set_b_cas_card)(void *std_b25, B_CAS_CARD *bcas);
-	
+
 	int (* reset)(void *std_b25);
 	int (* flush)(void *std_b25);
 
@@ -44,17 +44,18 @@ typedef struct {
 	int (* get_program_count)(void *std_b25);
 	int (* get_program_info)(void *std_b25, ARIB_STD_B25_PROGRAM_INFO *info, int32_t idx);
 
+	int (*withdraw)(void *std_b25, ARIB_STD_B25_BUFFER *buf);
+
 } ARIB_STD_B25;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern ARIB_STD_B25 *create_arib_std_b25();
+extern ARIB_STD_B25 *create_arib_std_b25(void);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* ARIB_STD_B25_H */
-

@@ -17,11 +17,11 @@ typedef struct {
 } B_CAS_ID;
 
 typedef struct {
-	
+
 	int32_t  s_yy; /* start date : year  */
 	int32_t  s_mm; /* start date : month */
 	int32_t  s_dd; /* start date : day   */
-	
+
 	int32_t  l_yy; /* limit date : year  */
 	int32_t  l_mm; /* limit date : month */
 	int32_t  l_dd; /* limit date : day   */
@@ -29,10 +29,10 @@ typedef struct {
 	int32_t  hold_time; /* in hour unit  */
 
 	int32_t  broadcaster_group_id;
-	
+
 	int32_t  network_id;
 	int32_t  transport_id;
-	
+
 } B_CAS_PWR_ON_CTRL;
 
 typedef struct {
@@ -57,16 +57,16 @@ typedef struct {
 	int (* get_id)(void *bcas, B_CAS_ID *dst);
 	int (* get_pwr_on_ctrl)(void *bcas, B_CAS_PWR_ON_CTRL_INFO *dst);
 
-	int (* proc_ecm)(void *bcas, B_CAS_ECM_RESULT *dst, uint8_t *src, int len);
-	int (* proc_emm)(void *bcas, uint8_t *src, int len);
-	
+	int (* proc_ecm)(void *bcas, B_CAS_ECM_RESULT *dst, uint8_t *src, int32_t len);
+	int (* proc_emm)(void *bcas, uint8_t *src, int32_t len);
+
 } B_CAS_CARD;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern B_CAS_CARD *create_b_cas_card();
+extern B_CAS_CARD *create_b_cas_card(void);
 
 #ifdef __cplusplus
 }
