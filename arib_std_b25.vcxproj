@@ -179,23 +179,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\arib_std_b25.c" />
-    <ClCompile Include="src\b_cas_card.c" />
-    <ClCompile Include="src\multi2.c" />
-    <ClCompile Include="src\td.c" />
-    <ClCompile Include="src\ts_section_parser.c" />
+    <ClCompile Include="aribb25\arib_std_b25.c" />
+    <ClCompile Include="aribb25\b_cas_card.c" />
+    <ClCompile Include="aribb25\multi2.c" />
+    <ClCompile Include="aribb25\td.c" />
+    <ClCompile Include="aribb25\ts_section_parser.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\arib_std_b25.h" />
-    <ClInclude Include="src\arib_std_b25_error_code.h" />
-    <ClInclude Include="src\b_cas_card.h" />
-    <ClInclude Include="src\b_cas_card_error_code.h" />
-    <ClInclude Include="src\multi2.h" />
-    <ClInclude Include="src\multi2_error_code.h" />
-    <ClInclude Include="src\portable.h" />
-    <ClInclude Include="src\ts_common_types.h" />
-    <ClInclude Include="src\ts_section_parser.h" />
-    <ClInclude Include="src\ts_section_parser_error_code.h" />
+    <ClInclude Include="aribb25\arib_std_b25.h" />
+    <ClInclude Include="aribb25\arib_std_b25_error_code.h" />
+    <ClInclude Include="aribb25\b_cas_card.h" />
+    <ClInclude Include="aribb25\b_cas_card_error_code.h" />
+    <ClInclude Include="aribb25\multi2.h" />
+    <ClInclude Include="aribb25\multi2_error_code.h" />
+    <ClInclude Include="aribb25\portable.h" />
+    <ClInclude Include="aribb25\ts_common_types.h" />
+    <ClInclude Include="aribb25\ts_section_parser.h" />
+    <ClInclude Include="aribb25\ts_section_parser_error_code.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

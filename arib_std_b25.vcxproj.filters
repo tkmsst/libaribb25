@@ -15,51 +15,51 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\arib_std_b25.c">
+    <ClCompile Include="aribb25\arib_std_b25.c">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\b_cas_card.c">
+    <ClCompile Include="aribb25\b_cas_card.c">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\multi2.c">
+    <ClCompile Include="aribb25\multi2.c">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\td.c">
+    <ClCompile Include="aribb25\td.c">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="src\ts_section_parser.c">
+    <ClCompile Include="aribb25\ts_section_parser.c">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\arib_std_b25.h">
+    <ClInclude Include="aribb25\arib_std_b25.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\arib_std_b25_error_code.h">
+    <ClInclude Include="aribb25\arib_std_b25_error_code.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\b_cas_card.h">
+    <ClInclude Include="aribb25\b_cas_card.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\b_cas_card_error_code.h">
+    <ClInclude Include="aribb25\b_cas_card_error_code.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\multi2.h">
+    <ClInclude Include="aribb25\multi2.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\multi2_error_code.h">
+    <ClInclude Include="aribb25\multi2_error_code.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\portable.h">
+    <ClInclude Include="aribb25\portable.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\ts_common_types.h">
+    <ClInclude Include="aribb25\ts_common_types.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\ts_section_parser.h">
+    <ClInclude Include="aribb25\ts_section_parser.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="src\ts_section_parser_error_code.h">
+    <ClInclude Include="aribb25\ts_section_parser_error_code.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
