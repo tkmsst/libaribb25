@@ -3,9 +3,9 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "B25Decoder.h"
 
-int B25Decoder::strip;
-int B25Decoder::emm_proc;
-int B25Decoder::multi2_round;
+int B25Decoder::strip        = 1;
+int B25Decoder::emm_proc     = 0;
+int B25Decoder::multi2_round = 4;
 
 B25Decoder::B25Decoder() : _bcas(nullptr), _b25(nullptr), _data(nullptr)
 {
