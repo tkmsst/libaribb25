@@ -93,6 +93,12 @@ err:
 	return rc;	// error
 }
 
+void B25Decoder::setemm(bool flag)
+{
+	if (_b25)
+		_b25->set_emm_proc(_b25, flag ? 1 : 0);
+}
+
 void B25Decoder::decode(BYTE *pSrc, DWORD dwSrcSize, BYTE **ppDst, DWORD *pdwDstSize)
 {
 	if (!_b25)
@@ -190,8 +196,37 @@ void B25Decoder::decode(BYTE *pSrc, DWORD dwSrcSize, BYTE **ppDst, DWORD *pdwDst
 	return;	// success
 }
 
-void B25Decoder::setemm(bool flag)
+int B25Decoder::reset()
 {
+	int rc = 0;
+	
 	if (_b25)
-		_b25->set_emm_proc(_b25, flag ? 1 : 0);
+		rc = _b25->reset(_b25);
+	return rc;
+}
+
+int B25Decoder::flush()
+{
+	int rc = 0;
+	
+	if (_b25)
+		rc = _b25->flush(_b25);
+	return rc;
+}
+
+int B25Decoder::put(BYTE *pSrc, DWORD dwSrcSize)
+{
+	ARIB_STD_B25_BUFFER buf;
+	buf.data = pSrc;
+	buf.size = dwSrcSize;
+	return _b25->put(_b25, &buf);
+}
+
+int B25Decoder::get(BYTE **ppDst, DWORD *pdwDstSize)
+{
+	ARIB_STD_B25_BUFFER buf;
+	int rc = _b25->get(_b25, &buf);
+	*ppDst = buf.data;
+	*pdwDstSize = buf.size;
+	return rc;
 }

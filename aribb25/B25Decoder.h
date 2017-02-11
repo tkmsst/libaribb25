@@ -16,8 +16,14 @@ public:
 	B25Decoder();
 	~B25Decoder();
 	int init();
-	void decode(BYTE *pSrc, DWORD dwSrcSize, BYTE **ppDst, DWORD *pdwDstSize);
 	void setemm(bool flag);
+	void decode(BYTE *pSrc, DWORD dwSrcSize, BYTE **ppDst, DWORD *pdwDstSize);
+
+	// libaribb25 wrapper
+	int reset();
+	int flush();
+	int put(BYTE *pSrc, DWORD dwSrcSize);
+	int get(BYTE **ppDst, DWORD *pdwDstSize);
 
 	// initialize parameter
 	static int strip;
