@@ -3,12 +3,22 @@
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef __B25DECODER_H__
 #define __B25DECODER_H__
-#include <windows.h>
-#include <mutex>
+
+#if defined(_WIN32)
+	#include <windows.h>
+	#include <mutex>
+#else
+	#include <stdlib.h>
+	#include <string.h>
+	#include <time.h>
+	#include <pthread.h>
+#endif
+
+#include "portable.h"
 #include "arib_std_b25.h"
 #include "arib_std_b25_error_code.h"
 
-#define RETRY_INTERVAL	10000	// 10sec interval
+#define RETRY_INTERVAL	10	// 10sec interval
 
 class B25Decoder
 {
@@ -31,11 +41,19 @@ public:
 	static int multi2_round;
 
 private:
+#if defined(_WIN32)
 	std::mutex _mtx;
+#else
+	pthread_mutex_t _mtx;
+#endif
 	B_CAS_CARD *_bcas;
 	ARIB_STD_B25 *_b25;
 	BYTE *_data;
+#if defined(_WIN32)
 	DWORD _errtime;
+#else
+	struct timespec _errtime;
+#endif
 };
 
 #endif	// __B25DECODER_H__

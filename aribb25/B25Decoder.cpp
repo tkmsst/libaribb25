@@ -9,6 +9,9 @@ int B25Decoder::multi2_round = 4;
 
 B25Decoder::B25Decoder() : _bcas(nullptr), _b25(nullptr), _data(nullptr)
 {
+#if !defined(_WIN32)
+	pthread_mutex_init(&_mtx, nullptr);
+#endif
 }
 
 B25Decoder::~B25Decoder()
@@ -16,7 +19,11 @@ B25Decoder::~B25Decoder()
 	if (_data)
 		::free(_data);
 
-	std::lock_guard<std::mutex> lock(_mtx);
+#if defined(_WIN32)
+	_mtx.lock();
+#else
+	pthread_mutex_lock(&_mtx);
+#endif
 
 	if (_b25)
 		_b25->release(_b25);
@@ -24,31 +31,40 @@ B25Decoder::~B25Decoder()
 	if (_bcas)
 		_bcas->release(_bcas);
 
-	char log[64];
-	::wsprintfA(log, "B25Decoder::dtor() : end");
-	::OutputDebugStringA(log);
+#if defined(_WIN32)
+	_mtx.unlock();
+#else
+	pthread_mutex_unlock(&_mtx);
+	pthread_mutex_destroy(&_mtx);
+#endif
 }
 
 int B25Decoder::init()
 {
 	int rc;
 
-	std::lock_guard<std::mutex> lock(_mtx);
+#if defined(_WIN32)
+	_mtx.lock();;
+#else
+	pthread_mutex_lock(&_mtx);
+#endif
 
 	if (_b25)
-		return -2;
-
-	char log[64];
+	{
+		rc = -2;
+		goto unlock;
+	}
 
 	_bcas = create_b_cas_card();
 	if (!_bcas)
-		return -3;
+	{
+		rc = -3;
+		goto unlock;
+	}
 
 	rc = _bcas->init(_bcas);
 	if (rc < 0)
 	{
-		::wsprintfA(log, "B25Decoder::init() :  bcas init error / rc(%d)", rc);
-		::OutputDebugStringA(log);
 		rc = -4;
 		goto err;
 	}
@@ -66,15 +82,16 @@ int B25Decoder::init()
 		goto err;
 	}
 
+	// success
 	_b25->set_strip(_b25, strip);
 	_b25->set_emm_proc(_b25, emm_proc);
 	_b25->set_multi2_round(_b25, multi2_round);
 
-	::wsprintfA(log, "B25Decoder::init() : success");
-	::OutputDebugStringA(log);
-	return 0;	// success
+	rc = 0;
+	goto unlock;
 
 err:
+	// error
 	if (_b25)
 	{
 		_b25->release(_b25);
@@ -87,10 +104,19 @@ err:
 		_bcas = nullptr;
 	}
 
-	::wsprintfA(log, "B25Decoder::init() : error / rc(%d)", rc);
-	::OutputDebugStringA(log);
+#if defined(_WIN32)
 	_errtime = ::GetTickCount();
-	return rc;	// error
+#else
+	clock_gettime(CLOCK_MONOTONIC_COARSE, &_errtime);
+#endif
+
+unlock:
+#if defined(_WIN32)
+	_mtx.unlock();
+#else
+	pthread_mutex_unlock(&_mtx);
+#endif
+	return rc;
 }
 
 void B25Decoder::setemm(bool flag)
@@ -103,8 +129,15 @@ void B25Decoder::decode(BYTE *pSrc, DWORD dwSrcSize, BYTE **ppDst, DWORD *pdwDst
 {
 	if (!_b25)
 	{
+#if defined(_WIN32)
 		DWORD now = ::GetTickCount();
-		if ((now - _errtime) > RETRY_INTERVAL)
+		DWORD interval = (now - _errtime) / 1000;
+#else
+		struct timespec now;
+		clock_gettime(CLOCK_MONOTONIC_COARSE, &now);
+		time_t interval = now.tv_sec - _errtime.tv_sec;
+#endif
+		if (interval > RETRY_INTERVAL)
 		{
 			if (init() < 0)
 				_errtime = now;
@@ -126,8 +159,6 @@ void B25Decoder::decode(BYTE *pSrc, DWORD dwSrcSize, BYTE **ppDst, DWORD *pdwDst
 		::free(_data);
 		_data = nullptr;
 	}
-
-	char log[64];
 
 	ARIB_STD_B25_BUFFER buf;
 	buf.data = pSrc;
@@ -153,11 +184,7 @@ void B25Decoder::decode(BYTE *pSrc, DWORD dwSrcSize, BYTE **ppDst, DWORD *pdwDst
 			BYTE *p = nullptr;
 			_b25->withdraw(_b25, &buf);	// withdraw src buffer
 			if (buf.size > 0)
-			{
-				::wsprintfA(log, "B25Decoder::decode() : error / withdraw size(%u)", buf.size);
-				::OutputDebugStringA(log);
 				p = (BYTE *)::malloc(buf.size + dwSrcSize);
-			}
 
 			if (p)
 			{
@@ -185,9 +212,11 @@ void B25Decoder::decode(BYTE *pSrc, DWORD dwSrcSize, BYTE **ppDst, DWORD *pdwDst
 				_bcas = nullptr;
 			}
 		}
-		::wsprintfA(log, "B25Decoder::decode() : error / rc(%d)", rc);
-		::OutputDebugStringA(log);
+#if defined(_WIN32)
 		_errtime = ::GetTickCount();
+#else
+		clock_gettime(CLOCK_MONOTONIC_COARSE, &_errtime);
+#endif
 		return;	// error
 	}
 	_b25->get(_b25, &buf);

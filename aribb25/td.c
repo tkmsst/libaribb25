@@ -1,16 +1,15 @@
-#if defined(WIN32)
-	#define _CRT_SECURE_NO_WARNINGS
+#if defined(_WIN32)
+#define _CRT_SECURE_NO_WARNINGS
 #endif
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#if defined(WIN32)
+#if defined(_WIN32)
 	#include <io.h>
 	#include <windows.h>
 	#include <crtdbg.h>
@@ -42,7 +41,7 @@ int main(int argc, char **argv)
 	int n;
 	OPTION opt;
 	
-	#if defined(WIN32)
+	#if defined(_WIN32)
 	_CrtSetReportMode( _CRT_WARN, _CRTDBG_MODE_FILE );
 	_CrtSetReportFile( _CRT_WARN, _CRTDBG_FILE_STDOUT );
 	_CrtSetReportMode( _CRT_ERROR, _CRTDBG_MODE_FILE );
@@ -62,7 +61,7 @@ int main(int argc, char **argv)
 		test_arib_std_b25(argv[n+0], argv[n+1], &opt);
 	}
 	
-	#if defined(WIN32)
+	#if defined(_WIN32)
 	_CrtDumpMemoryLeaks();
 	#endif
 
@@ -159,9 +158,9 @@ static void test_arib_std_b25(const char *src, const char *dst, OPTION *opt)
 	int code,i,n,m;
 	int sfd,dfd;
 
+	uint32_t offset;
 	int64_t total;
-	int64_t offset;
-#if defined(WIN32)
+#if defined(_WIN32)
 	unsigned long tick,tock;
 #else
 	struct timeval tick,tock;
@@ -243,7 +242,7 @@ static void test_arib_std_b25(const char *src, const char *dst, OPTION *opt)
 	}
 
 	offset = 0;
-#if defined(WIN32)
+#if defined(_WIN32)
 	tock = GetTickCount();
 #else
 	gettimeofday(&tock, NULL);
@@ -276,7 +275,7 @@ static void test_arib_std_b25(const char *src, const char *dst, OPTION *opt)
 		if(opt->verbose != 0){
 			m = (int)(10000*offset/total);
 			mbps = 0.0;
-#if defined(WIN32)
+#if defined(_WIN32)
 			tick = GetTickCount();
 			if (tick-tock > 100) {
 				mbps = offset;
@@ -319,7 +318,7 @@ static void test_arib_std_b25(const char *src, const char *dst, OPTION *opt)
 
 	if(opt->verbose != 0){
 		mbps = 0.0;
-#if defined(WIN32)
+#if defined(_WIN32)
 		tick = GetTickCount();
 		if (tick-tock > 100) {
 			mbps = offset;
@@ -357,7 +356,7 @@ static void test_arib_std_b25(const char *src, const char *dst, OPTION *opt)
 			fprintf(stderr, "  channel:               %d\n", pgrm.program_number);
 			fprintf(stderr, "  unpurchased ECM count: %d\n", pgrm.ecm_unpurchased_count);
 			fprintf(stderr, "  last ECM error code:   %04x\n", pgrm.last_ecm_error_code);
-			#if defined(WIN32)
+			#if defined(_WIN32)
 			fprintf(stderr, "  undecrypted TS packet: %I64d\n", pgrm.undecrypted_packet_count);
 			fprintf(stderr, "  total TS packet:       %I64d\n", pgrm.total_packet_count);
 			#else
