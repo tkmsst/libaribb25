@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="ソース ファイル">
@@ -7,59 +7,65 @@
     </Filter>
     <Filter Include="ヘッダー ファイル">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
     <Filter Include="リソース ファイル">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="aribb25\arib_std_b25.c">
+    <ClCompile Include="b_cas_card.c">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="aribb25\b_cas_card.c">
+    <ClCompile Include="multi2.c">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="aribb25\multi2.c">
+    <ClCompile Include="ts_section_parser.c">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="aribb25\td.c">
+    <ClCompile Include="arib_std_b25.c">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="aribb25\ts_section_parser.c">
+    <ClCompile Include="libaribb25.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="aribb25\arib_std_b25.h">
+    <ClInclude Include="multi2.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="aribb25\arib_std_b25_error_code.h">
+    <ClInclude Include="multi2_error_code.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="aribb25\b_cas_card.h">
+    <ClInclude Include="portable.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="aribb25\b_cas_card_error_code.h">
+    <ClInclude Include="ts_common_types.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="aribb25\multi2.h">
+    <ClInclude Include="ts_section_parser.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="aribb25\multi2_error_code.h">
+    <ClInclude Include="ts_section_parser_error_code.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="aribb25\portable.h">
+    <ClInclude Include="arib_std_b25.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="aribb25\ts_common_types.h">
+    <ClInclude Include="arib_std_b25_error_code.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="aribb25\ts_section_parser.h">
+    <ClInclude Include="b_cas_card.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="aribb25\ts_section_parser_error_code.h">
+    <ClInclude Include="b_cas_card_error_code.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="IB25Decoder.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="libaribb25.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

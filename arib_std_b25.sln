@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "arib_std_b25", "arib_std_b25.vcxproj", "{6E77C1AC-A31A-49B9-9A52-9FE1E03B8FEC}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "b25", "aribb25\b25.vcxproj", "{6E77C1AC-A31A-49B9-9A52-9FE1E03B8FEC}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libaribb25", "aribb25\libaribb25.vcxproj", "{32FCD075-2C1D-4796-926B-A0009ECCD1E8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,14 @@ Global
 		{6E77C1AC-A31A-49B9-9A52-9FE1E03B8FEC}.Release|Win32.Build.0 = Release|Win32
 		{6E77C1AC-A31A-49B9-9A52-9FE1E03B8FEC}.Release|x64.ActiveCfg = Release|x64
 		{6E77C1AC-A31A-49B9-9A52-9FE1E03B8FEC}.Release|x64.Build.0 = Release|x64
+		{32FCD075-2C1D-4796-926B-A0009ECCD1E8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{32FCD075-2C1D-4796-926B-A0009ECCD1E8}.Debug|Win32.Build.0 = Debug|Win32
+		{32FCD075-2C1D-4796-926B-A0009ECCD1E8}.Debug|x64.ActiveCfg = Debug|x64
+		{32FCD075-2C1D-4796-926B-A0009ECCD1E8}.Debug|x64.Build.0 = Debug|x64
+		{32FCD075-2C1D-4796-926B-A0009ECCD1E8}.Release|Win32.ActiveCfg = Release|Win32
+		{32FCD075-2C1D-4796-926B-A0009ECCD1E8}.Release|Win32.Build.0 = Release|Win32
+		{32FCD075-2C1D-4796-926B-A0009ECCD1E8}.Release|x64.ActiveCfg = Release|x64
+		{32FCD075-2C1D-4796-926B-A0009ECCD1E8}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

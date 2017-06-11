@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -67,24 +67,26 @@
     <_ProjectFileVersion>12.0.30501.0</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
-    <IntDir>$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Intermediate\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <TargetName>b25</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <TargetName>b25</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
+    <IntDir>$(SolutionDir)Intermediate\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
-    <IntDir>$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Intermediate\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>b25</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>b25</TargetName>
+    <TargetName>$(ProjectName)</TargetName>
+    <IntDir>$(SolutionDir)Intermediate\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -99,7 +101,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>winscard.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)b25.exe</OutputFile>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <GenerateDebugInformation>Debug</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
@@ -119,7 +121,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>winscard.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)b25.exe</OutputFile>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <GenerateDebugInformation>Debug</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
     </Link>
@@ -142,7 +144,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>winscard.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)b25.exe</OutputFile>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -170,7 +172,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>winscard.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)b25.exe</OutputFile>
+      <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -179,23 +181,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="aribb25\arib_std_b25.c" />
-    <ClCompile Include="aribb25\b_cas_card.c" />
-    <ClCompile Include="aribb25\multi2.c" />
-    <ClCompile Include="aribb25\td.c" />
-    <ClCompile Include="aribb25\ts_section_parser.c" />
+    <ClCompile Include="arib_std_b25.c" />
+    <ClCompile Include="b_cas_card.c" />
+    <ClCompile Include="multi2.c" />
+    <ClCompile Include="td.c" />
+    <ClCompile Include="ts_section_parser.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="aribb25\arib_std_b25.h" />
-    <ClInclude Include="aribb25\arib_std_b25_error_code.h" />
-    <ClInclude Include="aribb25\b_cas_card.h" />
-    <ClInclude Include="aribb25\b_cas_card_error_code.h" />
-    <ClInclude Include="aribb25\multi2.h" />
-    <ClInclude Include="aribb25\multi2_error_code.h" />
-    <ClInclude Include="aribb25\portable.h" />
-    <ClInclude Include="aribb25\ts_common_types.h" />
-    <ClInclude Include="aribb25\ts_section_parser.h" />
-    <ClInclude Include="aribb25\ts_section_parser_error_code.h" />
+    <ClInclude Include="arib_std_b25.h" />
+    <ClInclude Include="arib_std_b25_error_code.h" />
+    <ClInclude Include="b_cas_card.h" />
+    <ClInclude Include="b_cas_card_error_code.h" />
+    <ClInclude Include="multi2.h" />
+    <ClInclude Include="multi2_error_code.h" />
+    <ClInclude Include="portable.h" />
+    <ClInclude Include="ts_common_types.h" />
+    <ClInclude Include="ts_section_parser.h" />
+    <ClInclude Include="ts_section_parser_error_code.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -990,7 +990,7 @@ static int get_arib_std_b25(void *std_b25, ARIB_STD_B25_BUFFER *buf)
 	}
 
 	buf->data = prv->dbuf.head;
-	buf->size = prv->dbuf.tail - prv->dbuf.head;
+	buf->size = (uint32_t)(prv->dbuf.tail - prv->dbuf.head);	// cast
 
 	reset_work_buffer(&(prv->dbuf));
 
@@ -1069,7 +1069,7 @@ static int withdraw_arib_std_b25(void *std_b25, ARIB_STD_B25_BUFFER *buf)
 	}
 
 	buf->data = prv->sbuf.head;
-	buf->size = prv->sbuf.tail - prv->sbuf.head;
+	buf->size = (uint32_t)(prv->sbuf.tail - prv->sbuf.head);	// cast
 
 	reset_work_buffer(&(prv->sbuf));
 
@@ -1927,7 +1927,7 @@ LAST:
 static int proc_ecm(DECRYPTOR_ELEM *dec, B_CAS_CARD *bcas, int32_t multi2_round)
 {
 	int r,n;
-	int32_t len;
+	uint32_t len;
 
 	uint8_t *p;
 
@@ -1962,7 +1962,7 @@ static int proc_ecm(DECRYPTOR_ELEM *dec, B_CAS_CARD *bcas, int32_t multi2_round)
 		goto LAST;
 	}
 
-	len = (sect.tail - sect.data) - 4;
+	len = (uint32_t)(sect.tail - sect.data) - 4;	// cast
 	p = sect.data;
 
 	r = bcas->proc_ecm(bcas, &res, p, len);
