@@ -1,7 +1,7 @@
 PREFIX = /usr/local
 MAJOR = 0
 MINOR = 2
-REVISION = 5
+REVISION = 6
 VER = $(MAJOR).$(MINOR).$(REVISION)
 
 DEST_HEADER = $(PREFIX)/include/aribb25

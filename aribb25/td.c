@@ -1,3 +1,5 @@
+#define VERSION_STRING "0.2.6"
+
 #if defined(_WIN32)
 #define _CRT_SECURE_NO_WARNINGS
 #endif
@@ -5,6 +7,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -13,8 +16,15 @@
 	#include <io.h>
 	#include <windows.h>
 	#include <crtdbg.h>
+	#include <tchar.h>
 #else
 	#define __STDC_FORMAT_MACROS
+	#define TCHAR char
+	#define _T(X) X
+	#define _ftprintf fprintf
+	#define _ttoi atoi
+	#define _tmain main
+	#define _topen _open
 	#include <inttypes.h>
 	#include <unistd.h>
 	#include <sys/time.h>
@@ -32,11 +42,11 @@ typedef struct {
 } OPTION;
 
 static void show_usage();
-static int parse_arg(OPTION *dst, int argc, char **argv);
-static void test_arib_std_b25(const char *src, const char *dst, OPTION *opt);
+static int parse_arg(OPTION *dst, int argc, TCHAR **argv);
+static void test_arib_std_b25(const TCHAR *src, const TCHAR *dst, OPTION *opt);
 static void show_bcas_power_on_control_info(B_CAS_CARD *bcas);
 
-int main(int argc, char **argv)
+int _tmain(int argc, TCHAR **argv)
 {
 	int n;
 	OPTION opt;
@@ -70,26 +80,26 @@ int main(int argc, char **argv)
 
 static void show_usage()
 {
-	fprintf(stderr, "b25 - ARIB STD-B25 test program ver. 0.2.5 (2012, 2/13)\n");
-	fprintf(stderr, "usage: b25 [options] src.m2t dst.m2t [more pair ..]\n");
-	fprintf(stderr, "options:\n");
-	fprintf(stderr, "  -r round (integer, default=4)\n");
-	fprintf(stderr, "  -s strip\n");
-	fprintf(stderr, "     0: keep null(padding) stream (default)\n");
-	fprintf(stderr, "     1: strip null stream\n");
-	fprintf(stderr, "  -m EMM\n");
-	fprintf(stderr, "     0: ignore EMM (default)\n");
-	fprintf(stderr, "     1: send EMM to B-CAS card\n");
-	fprintf(stderr, "  -p power_on_control_info\n");
-	fprintf(stderr, "     0: do nothing additionaly\n");
-	fprintf(stderr, "     1: show B-CAS EMM receiving request (default)\n");
-	fprintf(stderr, "  -v verbose\n");
-	fprintf(stderr, "     0: silent\n");
-	fprintf(stderr, "     1: show processing status (default)\n");
-	fprintf(stderr, "\n");
+	_ftprintf(stderr, _T("b25 - ARIB STD-B25 test program version %s\n"), _T(VERSION_STRING));
+	_ftprintf(stderr, _T("usage: b25 [options] src.m2t dst.m2t [more pair ..]\n"));
+	_ftprintf(stderr, _T("options:\n"));
+	_ftprintf(stderr, _T("  -r round (integer, default=4)\n"));
+	_ftprintf(stderr, _T("  -s strip\n"));
+	_ftprintf(stderr, _T("     0: keep null(padding) stream (default)\n"));
+	_ftprintf(stderr, _T("     1: strip null stream\n"));
+	_ftprintf(stderr, _T("  -m EMM\n"));
+	_ftprintf(stderr, _T("     0: ignore EMM (default)\n"));
+	_ftprintf(stderr, _T("     1: send EMM to B-CAS card\n"));
+	_ftprintf(stderr, _T("  -p power_on_control_info\n"));
+	_ftprintf(stderr, _T("     0: do nothing additionaly\n"));
+	_ftprintf(stderr, _T("     1: show B-CAS EMM receiving request (default)\n"));
+	_ftprintf(stderr, _T("  -v verbose\n"));
+	_ftprintf(stderr, _T("     0: silent\n"));
+	_ftprintf(stderr, _T("     1: show processing status (default)\n"));
+	_ftprintf(stderr, _T("\n"));
 }
 
-static int parse_arg(OPTION *dst, int argc, char **argv)
+static int parse_arg(OPTION *dst, int argc, TCHAR **argv)
 {
 	int i;
 	
@@ -106,46 +116,46 @@ static int parse_arg(OPTION *dst, int argc, char **argv)
 		switch(argv[i][1]){
 		case 'm':
 			if(argv[i][2]){
-				dst->emm = atoi(argv[i]+2);
+				dst->emm = _ttoi(argv[i]+2);
 			}else{
-				dst->emm = atoi(argv[i+1]);
+				dst->emm = _ttoi(argv[i+1]);
 				i += 1;
 			}
 			break;
 		case 'p':
 			if(argv[i][2]){
-				dst->power_ctrl = atoi(argv[i]+2);
+				dst->power_ctrl = _ttoi(argv[i]+2);
 			}else{
-				dst->power_ctrl = atoi(argv[i+1]);
+				dst->power_ctrl = _ttoi(argv[i+1]);
 				i += 1;
 			}
 			break;
 		case 'r':
 			if(argv[i][2]){
-				dst->round = atoi(argv[i]+2);
+				dst->round = _ttoi(argv[i]+2);
 			}else{
-				dst->round = atoi(argv[i+1]);
+				dst->round = _ttoi(argv[i+1]);
 				i += 1;
 			}
 			break;
 		case 's':
 			if(argv[i][2]){
-				dst->strip = atoi(argv[i]+2);
+				dst->strip = _ttoi(argv[i]+2);
 			}else{
-				dst->strip = atoi(argv[i+1]);
+				dst->strip = _ttoi(argv[i+1]);
 				i += 1;
 			}
 			break;
 		case 'v':
 			if(argv[i][2]){
-				dst->verbose = atoi(argv[i]+2);
+				dst->verbose = _ttoi(argv[i]+2);
 			}else{
-				dst->verbose = atoi(argv[i+1]);
+				dst->verbose = _ttoi(argv[i+1]);
 				i += 1;
 			}
 			break;
 		default:
-			fprintf(stderr, "error - unknown option '-%c'\n", argv[i][1]);
+			_ftprintf(stderr, _T("error - unknown option '-%c'\n"), argv[i][1]);
 			return argc;
 		}
 	}
@@ -153,13 +163,13 @@ static int parse_arg(OPTION *dst, int argc, char **argv)
 	return i;
 }
 
-static void test_arib_std_b25(const char *src, const char *dst, OPTION *opt)
+static void test_arib_std_b25(const TCHAR *src, const TCHAR *dst, OPTION *opt)
 {
 	int code,i,n,m;
 	int sfd,dfd;
 
-	uint32_t offset;
 	int64_t total;
+	int32_t offset;
 #if defined(_WIN32)
 	unsigned long tick,tock;
 #else
@@ -183,9 +193,9 @@ static void test_arib_std_b25(const char *src, const char *dst, OPTION *opt)
 	b25 = NULL;
 	bcas = NULL;
 
-	sfd = _open(src, _O_BINARY|_O_RDONLY|_O_SEQUENTIAL);
+	sfd = _topen(src, _O_BINARY|_O_RDONLY|_O_SEQUENTIAL);
 	if(sfd < 0){
-		fprintf(stderr, "error - failed on _open(%s) [src]\n", src);
+		_ftprintf(stderr, _T("error - failed on _open(%s) [src]\n"), src);
 		goto LAST;
 	}
 	
@@ -195,49 +205,49 @@ static void test_arib_std_b25(const char *src, const char *dst, OPTION *opt)
 
 	b25 = create_arib_std_b25();
 	if(b25 == NULL){
-		fprintf(stderr, "error - failed on create_arib_std_b25()\n");
+		_ftprintf(stderr, _T("error - failed on create_arib_std_b25()\n"));
 		goto LAST;
 	}
 
 	code = b25->set_multi2_round(b25, opt->round);
 	if(code < 0){
-		fprintf(stderr, "error - failed on ARIB_STD_B25::set_multi2_round() : code=%d\n", code);
+		_ftprintf(stderr, _T("error - failed on ARIB_STD_B25::set_multi2_round() : code=%d\n"), code);
 		goto LAST;
 	}
 
 	code = b25->set_strip(b25, opt->strip);
 	if(code < 0){
-		fprintf(stderr, "error - failed on ARIB_STD_B25::set_strip() : code=%d\n", code);
+		_ftprintf(stderr, _T("error - failed on ARIB_STD_B25::set_strip() : code=%d\n"), code);
 		goto LAST;
 	}
 
 	code = b25->set_emm_proc(b25, opt->emm);
 	if(code < 0){
-		fprintf(stderr, "error - failed on ARIB_STD_B25::set_emm_proc() : code=%d\n", code);
+		_ftprintf(stderr, _T("error - failed on ARIB_STD_B25::set_emm_proc() : code=%d\n"), code);
 		goto LAST;
 	}
 
 	bcas = create_b_cas_card();
 	if(bcas == NULL){
-		fprintf(stderr, "error - failed on create_b_cas_card()\n");
+		_ftprintf(stderr, _T("error - failed on create_b_cas_card()\n"));
 		goto LAST;
 	}
 
 	code = bcas->init(bcas);
 	if(code < 0){
-		fprintf(stderr, "error - failed on B_CAS_CARD::init() : code=%d\n", code);
+		_ftprintf(stderr, _T("error - failed on B_CAS_CARD::init() : code=%d\n"), code);
 		goto LAST;
 	}
 
 	code = b25->set_b_cas_card(b25, bcas);
 	if(code < 0){
-		fprintf(stderr, "error - failed on ARIB_STD_B25::set_b_cas_card() : code=%d\n", code);
+		_ftprintf(stderr, _T("error - failed on ARIB_STD_B25::set_b_cas_card() : code=%d\n"), code);
 		goto LAST;
 	}
 
-	dfd = _open(dst, _O_BINARY|_O_WRONLY|_O_SEQUENTIAL|_O_CREAT|_O_TRUNC, _S_IREAD|_S_IWRITE);
+	dfd = _topen(dst, _O_BINARY|_O_WRONLY|_O_SEQUENTIAL|_O_CREAT|_O_TRUNC, _S_IREAD|_S_IWRITE);
 	if(dfd < 0){
-		fprintf(stderr, "error - failed on _open(%s) [dst]\n", dst);
+		_ftprintf(stderr, _T("error - failed on _open(%s) [dst]\n"), dst);
 		goto LAST;
 	}
 
@@ -253,20 +263,20 @@ static void test_arib_std_b25(const char *src, const char *dst, OPTION *opt)
 
 		code = b25->put(b25, &sbuf);
 		if(code < 0){
-			fprintf(stderr, "error - failed on ARIB_STD_B25::put() : code=%d\n", code);
+			_ftprintf(stderr, _T("error - failed on ARIB_STD_B25::put() : code=%d\n"), code);
 			goto LAST;
 		}
 
 		code = b25->get(b25, &dbuf);
 		if(code < 0){
-			fprintf(stderr, "error - failed on ARIB_STD_B25::get() : code=%d\n", code);
+			_ftprintf(stderr, _T("error - failed on ARIB_STD_B25::get() : code=%d\n"), code);
 			goto LAST;
 		}
 
 		if(dbuf.size > 0){
 			n = _write(dfd, dbuf.data, dbuf.size);
 			if(n != dbuf.size){
-				fprintf(stderr, "error failed on _write(%d)\n", dbuf.size);
+				_ftprintf(stderr, _T("error failed on _write(%d)\n"), dbuf.size);
 				goto LAST;
 			}
 		}
@@ -292,26 +302,26 @@ static void test_arib_std_b25(const char *src, const char *dst, OPTION *opt)
 				mbps /= millisec;
 			}
 #endif
-			fprintf(stderr, "\rprocessing: %2d.%02d%% [%6.2f MB/sec]", m/100, m%100, mbps);
+			_ftprintf(stderr, _T("\rprocessing: %2d.%02d%% [%6.2f MB/sec]"), m/100, m%100, mbps);
 		}
 	}
 
 	code = b25->flush(b25);
 	if(code < 0){
-		fprintf(stderr, "error - failed on ARIB_STD_B25::flush() : code=%d\n", code);
+		_ftprintf(stderr, _T("error - failed on ARIB_STD_B25::flush() : code=%d\n"), code);
 		goto LAST;
 	}
 	
 	code = b25->get(b25, &dbuf);
 	if(code < 0){
-		fprintf(stderr, "error - failed on ARIB_STD_B25::get() : code=%d\n", code);
+		_ftprintf(stderr, _T("error - failed on ARIB_STD_B25::get() : code=%d\n"), code);
 		goto LAST;
 	}
 
 	if(dbuf.size > 0){
 		n = _write(dfd, dbuf.data, dbuf.size);
 		if(n != dbuf.size){
-			fprintf(stderr, "error - failed on _write(%d)\n", dbuf.size);
+			_ftprintf(stderr, _T("error - failed on _write(%d)\n"), dbuf.size);
 			goto LAST;
 		}
 	}
@@ -335,33 +345,33 @@ static void test_arib_std_b25(const char *src, const char *dst, OPTION *opt)
 			mbps /= millisec;
 		}
 #endif
-		fprintf(stderr, "\rprocessing: finish  [%6.2f MB/sec]\n", mbps);
+		_ftprintf(stderr, _T("\rprocessing: finish  [%6.2f MB/sec]\n"), mbps);
 		fflush(stderr);
 		fflush(stdout);
 	}
 
 	n = b25->get_program_count(b25);
 	if(n < 0){
-		fprintf(stderr, "error - failed on ARIB_STD_B25::get_program_count() : code=%d\n", code);
+		_ftprintf(stderr, _T("error - failed on ARIB_STD_B25::get_program_count() : code=%d\n"), code);
 		goto LAST;
 	}
 	for(i=0;i<n;i++){
 		code = b25->get_program_info(b25, &pgrm, i);
 		if(code < 0){
-			fprintf(stderr, "error - failed on ARIB_STD_B25::get_program_info(%d) : code=%d\n", i, code);
+			_ftprintf(stderr, _T("error - failed on ARIB_STD_B25::get_program_info(%d) : code=%d\n"), i, code);
 			goto LAST;
 		}
 		if(pgrm.ecm_unpurchased_count > 0){
-			fprintf(stderr, "warning - unpurchased ECM is detected\n");
-			fprintf(stderr, "  channel:               %d\n", pgrm.program_number);
-			fprintf(stderr, "  unpurchased ECM count: %d\n", pgrm.ecm_unpurchased_count);
-			fprintf(stderr, "  last ECM error code:   %04x\n", pgrm.last_ecm_error_code);
+			_ftprintf(stderr, _T("warning - unpurchased ECM is detected\n"));
+			_ftprintf(stderr, _T("  channel:               %d\n"), pgrm.program_number);
+			_ftprintf(stderr, _T("  unpurchased ECM count: %d\n"), pgrm.ecm_unpurchased_count);
+			_ftprintf(stderr, _T("  last ECM error code:   %04x\n"), pgrm.last_ecm_error_code);
 			#if defined(_WIN32)
-			fprintf(stderr, "  undecrypted TS packet: %I64d\n", pgrm.undecrypted_packet_count);
-			fprintf(stderr, "  total TS packet:       %I64d\n", pgrm.total_packet_count);
+			_ftprintf(stderr, _T("  undecrypted TS packet: %I64d\n"), pgrm.undecrypted_packet_count);
+			_ftprintf(stderr, _T("  total TS packet:       %I64d\n"), pgrm.total_packet_count);
 			#else
-			fprintf(stderr, "  undecrypted TS packet: %"PRId64"\n", pgrm.undecrypted_packet_count);
-			fprintf(stderr, "  total TS packet:       %"PRId64"\n", pgrm.total_packet_count);
+			_ftprintf(stderr, _T("  undecrypted TS packet: %"PRId64"\n"), pgrm.undecrypted_packet_count);
+			_ftprintf(stderr, _T("  total TS packet:       %"PRId64"\n"), pgrm.total_packet_count);
 			#endif
 		}
 	}
@@ -401,35 +411,34 @@ static void show_bcas_power_on_control_info(B_CAS_CARD *bcas)
 
 	code = bcas->get_pwr_on_ctrl(bcas, &pwc);
 	if(code < 0){
-		fprintf(stderr, "error - failed on B_CAS_CARD::get_pwr_on_ctrl() : code=%d\n", code);
+		_ftprintf(stderr, _T("error - failed on B_CAS_CARD::get_pwr_on_ctrl() : code=%d\n"), code);
 		return;
 	}
 
 	if(pwc.count == 0){
-		fprintf(stdout, "no EMM receiving request\n");
+		_ftprintf(stdout, _T("no EMM receiving request\n"));
 		return;
 	}
 
-	fprintf(stdout, "total %d EMM receiving request\n", pwc.count);
+	_ftprintf(stdout, _T("total %d EMM receiving request\n"), pwc.count);
 	for(i=0;i<pwc.count;i++){
-		fprintf(stdout, "+ [%d] : tune ", i);
+		_ftprintf(stdout, _T("+ [%d] : tune "), i);
 		switch(pwc.data[i].network_id){
 		case 4:
 			w = pwc.data[i].transport_id;
-			fprintf(stdout, "BS-%d/TS-%d ", ((w >> 4) & 0x1f), (w & 7));
+			_ftprintf(stdout, _T("BS-%d/TS-%d "), ((w >> 4) & 0x1f), (w & 7));
 			break;
 		case 6:
 		case 7:
 			w = pwc.data[i].transport_id;
-			fprintf(stdout, "ND-%d/TS-%d ", ((w >> 4) & 0x1f), (w & 7));
+			_ftprintf(stdout, _T("ND-%d/TS-%d "), ((w >> 4) & 0x1f), (w & 7));
 			break;
 		default:
-			fprintf(stdout, "unknown(b:0x%02x,n:0x%04x,t:0x%04x) ", pwc.data[i].broadcaster_group_id, pwc.data[i].network_id, pwc.data[i].transport_id);
+			_ftprintf(stdout, _T("unknown(b:0x%02x,n:0x%04x,t:0x%04x) "), pwc.data[i].broadcaster_group_id, pwc.data[i].network_id, pwc.data[i].transport_id);
 			break;
 		}
-		fprintf(stdout, "between %04d %02d/%02d ", pwc.data[i].s_yy, pwc.data[i].s_mm, pwc.data[i].s_dd);
-		fprintf(stdout, "to %04d %02d/%02d ", pwc.data[i].l_yy, pwc.data[i].l_mm, pwc.data[i].l_dd);
-		fprintf(stdout, "least %d hours\n", pwc.data[i].hold_time);
+		_ftprintf(stdout, _T("between %04d %02d/%02d "), pwc.data[i].s_yy, pwc.data[i].s_mm, pwc.data[i].s_dd);
+		_ftprintf(stdout, _T("to %04d %02d/%02d "), pwc.data[i].l_yy, pwc.data[i].l_mm, pwc.data[i].l_dd);
+		_ftprintf(stdout, _T("least %d hours\n"), pwc.data[i].hold_time);
 	}
 }
-
