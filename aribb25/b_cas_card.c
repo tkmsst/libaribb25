@@ -7,8 +7,8 @@
 #include <winscard.h>
 
 #if defined(_WIN32)
-#include <tchar.h>
 #include <windows.h>
+#include <tchar.h>
 #endif
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
