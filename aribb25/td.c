@@ -19,15 +19,9 @@
 	#include <tchar.h>
 #else
 	#define __STDC_FORMAT_MACROS
-	#define TCHAR char
-	#define _T(X) X
-	#define _ftprintf fprintf
-	#define _ttoi atoi
-	#define _tmain main
-	#define _topen _open
-	#include <inttypes.h>
 	#include <unistd.h>
 	#include <sys/time.h>
+	#include "portable.h"
 #endif
 
 #include "arib_std_b25.h"

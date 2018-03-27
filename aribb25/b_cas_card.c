@@ -68,8 +68,8 @@ static int init_b_cas_card(void *bcas);
 static int get_init_status_b_cas_card(void *bcas, B_CAS_INIT_STATUS *stat);
 static int get_id_b_cas_card(void *bcas, B_CAS_ID *dst);
 static int get_pwr_on_ctrl_b_cas_card(void *bcas, B_CAS_PWR_ON_CTRL_INFO *dst);
-static int proc_ecm_b_cas_card(void *bcas, B_CAS_ECM_RESULT *dst, uint8_t *src, int32_t len);
-static int proc_emm_b_cas_card(void *bcas, uint8_t *src, int32_t len);
+static int proc_ecm_b_cas_card(void *bcas, B_CAS_ECM_RESULT *dst, uint8_t *src, int len);
+static int proc_emm_b_cas_card(void *bcas, uint8_t *src, int len);
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  global function implementation
@@ -137,8 +137,8 @@ static void release_b_cas_card(void *bcas)
 static int init_b_cas_card(void *bcas)
 {
 	int m;
-	LONG ret;
-	DWORD len;
+	long ret;
+	unsigned long len;
 
 	B_CAS_CARD_PRIVATE_DATA *prv;
 
@@ -213,10 +213,10 @@ static int get_init_status_b_cas_card(void *bcas, B_CAS_INIT_STATUS *stat)
 
 static int get_id_b_cas_card(void *bcas, B_CAS_ID *dst)
 {
-	LONG ret;
+	long ret;
 
-	DWORD slen;
-	DWORD rlen;
+	unsigned long slen;
+	unsigned long rlen;
 
 	int i,num;
 
@@ -275,10 +275,10 @@ static int get_id_b_cas_card(void *bcas, B_CAS_ID *dst)
 
 static int get_pwr_on_ctrl_b_cas_card(void *bcas, B_CAS_PWR_ON_CTRL_INFO *dst)
 {
-	LONG ret;
+	long ret;
 
-	DWORD slen;
-	DWORD rlen;
+	unsigned long slen;
+	unsigned long rlen;
 
 	int i,num,code;
 
@@ -345,9 +345,9 @@ static int proc_ecm_b_cas_card(void *bcas, B_CAS_ECM_RESULT *dst, uint8_t *src, 
 {
 	int retry_count;
 
-	LONG ret;
-	DWORD slen;
-	DWORD rlen;
+	long ret;
+	unsigned long slen;
+	unsigned long rlen;
 
 	B_CAS_CARD_PRIVATE_DATA *prv;
 
@@ -393,9 +393,9 @@ static int proc_emm_b_cas_card(void *bcas, uint8_t *src, int len)
 {
 	int retry_count;
 
-	LONG ret;
-	DWORD slen;
-	DWORD rlen;
+	long ret;
+	unsigned long slen;
+	unsigned long rlen;
 
 	B_CAS_CARD_PRIVATE_DATA *prv;
 
@@ -564,8 +564,8 @@ static int connect_card(B_CAS_CARD_PRIVATE_DATA *prv, LPCTSTR reader_name)
 {
 	int m,n;
 
-	LONG ret;
-	DWORD rlen,protocol;
+	long ret;
+	unsigned long rlen,protocol;
 
 	uint8_t *p;
 

@@ -57,8 +57,8 @@ typedef struct {
 	int (* get_id)(void *bcas, B_CAS_ID *dst);
 	int (* get_pwr_on_ctrl)(void *bcas, B_CAS_PWR_ON_CTRL_INFO *dst);
 
-	int (* proc_ecm)(void *bcas, B_CAS_ECM_RESULT *dst, uint8_t *src, int32_t len);
-	int (* proc_emm)(void *bcas, uint8_t *src, int32_t len);
+	int (* proc_ecm)(void *bcas, B_CAS_ECM_RESULT *dst, uint8_t *src, int len);
+	int (* proc_emm)(void *bcas, uint8_t *src, int len);
 
 } B_CAS_CARD;
 

@@ -80,7 +80,7 @@ const BOOL CB25Decoder::Initialize(DWORD dwRound)
 {
 	int ret = FALSE;
 
-	_mtx.lock();;
+	_mtx.lock();
 
 	if (_b25)
 		goto unlock;
@@ -213,6 +213,9 @@ const BOOL CB25Decoder::Flush(BYTE **ppDstBuf, DWORD *pdwDstSize)
 		int rc = _b25->flush(_b25);
 		ret = (rc < 0) ? FALSE : TRUE;
 	}
+
+	*ppDstBuf = NULL;
+	*pdwDstSize = 0;
 
 	return ret;
 }
