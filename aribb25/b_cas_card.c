@@ -1,15 +1,19 @@
 #include "b_cas_card.h"
 #include "b_cas_card_error_code.h"
 
-#include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <winscard.h>
+
+#include <math.h>
 
 #if defined(_WIN32)
-#include <windows.h>
-#include <tchar.h>
+	#include <windows.h>
+	#include <tchar.h>
+#else
+	#define TCHAR char
+	#define _tcslen strlen
 #endif
+#include <winscard.h>
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  inner structures
