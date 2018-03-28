@@ -4,19 +4,20 @@
 #ifndef __B25DECODER_H__
 #define __B25DECODER_H__
 
+#include <ctime>
+#include <cstring>
+#include <mutex>
+
 #if defined(_WIN32)
 	#include <windows.h>
-	#include <mutex>
+	#include "arib_std_b25.h"
+	#include "arib_std_b25_error_code.h"
 #else
 	#include <stdlib.h>
-	#include <string.h>
-	#include <time.h>
-	#include <pthread.h>
+	#include <aribb25/arib_std_b25.h>
+	#include <aribb25/arib_std_b25_error_code.h>
+	#include "typedef.h"
 #endif
-
-#include "portable.h"
-#include "arib_std_b25.h"
-#include "arib_std_b25_error_code.h"
 
 #define RETRY_INTERVAL	10	// 10sec interval
 
@@ -26,10 +27,13 @@ public:
 	B25Decoder();
 	~B25Decoder();
 	int init();
-	void setemm(bool flag);
+	void release();
 	void decode(BYTE *pSrc, DWORD dwSrcSize, BYTE **ppDst, DWORD *pdwDstSize);
 
 	// libaribb25 wrapper
+	int set_strip(int32_t strip);
+	int set_emm_proc(int32_t on);
+	int set_multi2_round(int32_t round);
 	int reset();
 	int flush();
 	int put(BYTE *pSrc, DWORD dwSrcSize);
@@ -41,19 +45,11 @@ public:
 	static int multi2_round;
 
 private:
-#if defined(_WIN32)
 	std::mutex _mtx;
-#else
-	pthread_mutex_t _mtx;
-#endif
 	B_CAS_CARD *_bcas;
 	ARIB_STD_B25 *_b25;
 	BYTE *_data;
-#if defined(_WIN32)
-	DWORD _errtime;
-#else
-	struct timespec _errtime;
-#endif
+	time_t _errtime;
 };
 
 #endif	// __B25DECODER_H__

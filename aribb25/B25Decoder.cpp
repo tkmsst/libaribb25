@@ -9,9 +9,6 @@ int B25Decoder::multi2_round = 4;
 
 B25Decoder::B25Decoder() : _bcas(nullptr), _b25(nullptr), _data(nullptr)
 {
-#if !defined(_WIN32)
-	pthread_mutex_init(&_mtx, nullptr);
-#endif
 }
 
 B25Decoder::~B25Decoder()
@@ -19,134 +16,77 @@ B25Decoder::~B25Decoder()
 	if (_data)
 		::free(_data);
 
-#if defined(_WIN32)
-	_mtx.lock();
-#else
-	pthread_mutex_lock(&_mtx);
-#endif
+	std::lock_guard<std::mutex> lock(_mtx);
 
 	if (_b25)
 		_b25->release(_b25);
 
 	if (_bcas)
 		_bcas->release(_bcas);
-
-#if defined(_WIN32)
-	_mtx.unlock();
-#else
-	pthread_mutex_unlock(&_mtx);
-	pthread_mutex_destroy(&_mtx);
-#endif
 }
 
 int B25Decoder::init()
 {
 	int rc;
 
-#if defined(_WIN32)
-	_mtx.lock();;
-#else
-	pthread_mutex_lock(&_mtx);
-#endif
+	std::lock_guard<std::mutex> lock(_mtx);
 
 	if (_b25)
-	{
-		rc = -2;
-		goto unlock;
-	}
+		return -2;
 
 	_bcas = create_b_cas_card();
 	if (!_bcas)
-	{
-		rc = -3;
-		goto unlock;
-	}
+		return -3;
 
 	rc = _bcas->init(_bcas);
-	if (rc < 0)
-	{
+	if (rc < 0) {
 		rc = -4;
 		goto err;
 	}
 
 	_b25 = create_arib_std_b25();
-	if (!_b25)
-	{
+	if (!_b25) {
 		rc = -5;
 		goto err;
 	}
 
-	if (_b25->set_b_cas_card(_b25, _bcas) < 0)
-	{
+	if (_b25->set_b_cas_card(_b25, _bcas) < 0) {
 		rc = -6;
 		goto err;
 	}
 
-	// success
 	_b25->set_strip(_b25, strip);
 	_b25->set_emm_proc(_b25, emm_proc);
 	_b25->set_multi2_round(_b25, multi2_round);
 
-	rc = 0;
-	goto unlock;
+	return 0;	// success
 
 err:
-	// error
-	if (_b25)
-	{
+	if (_b25) {
 		_b25->release(_b25);
 		_b25 = nullptr;
 	}
 
-	if (_bcas)
-	{
+	if (_bcas) {
 		_bcas->release(_bcas);
 		_bcas = nullptr;
 	}
 
-#if defined(_WIN32)
-	_errtime = ::GetTickCount();
-#else
-	clock_gettime(CLOCK_MONOTONIC_COARSE, &_errtime);
-#endif
-
-unlock:
-#if defined(_WIN32)
-	_mtx.unlock();
-#else
-	pthread_mutex_unlock(&_mtx);
-#endif
-	return rc;
-}
-
-void B25Decoder::setemm(bool flag)
-{
-	if (_b25)
-		_b25->set_emm_proc(_b25, flag ? 1 : 0);
+	_errtime = time(nullptr);
+	return rc;	// error
 }
 
 void B25Decoder::decode(BYTE *pSrc, DWORD dwSrcSize, BYTE **ppDst, DWORD *pdwDstSize)
 {
-	if (!_b25)
-	{
-#if defined(_WIN32)
-		DWORD now = ::GetTickCount();
-		DWORD interval = (now - _errtime) / 1000;
-#else
-		struct timespec now;
-		clock_gettime(CLOCK_MONOTONIC_COARSE, &now);
-		time_t interval = now.tv_sec - _errtime.tv_sec;
-#endif
-		if (interval > RETRY_INTERVAL)
-		{
+	if (!_b25) {
+		time_t now = time(nullptr);
+		if (difftime(now, _errtime) > RETRY_INTERVAL) {
 			if (init() < 0)
 				_errtime = now;
 		}
 
-		if (!_b25)
-		{
-			if (*ppDst != pSrc)
-			{
+		if (!_b25) {
+			if (*ppDst != pSrc) {
 				*ppDst = pSrc;
 				*pdwDstSize = dwSrcSize;
 			}
@@ -154,8 +94,7 @@ void B25Decoder::decode(BYTE *pSrc, DWORD dwSrcSize, BYTE **ppDst, DWORD *pdwDst
 		}
 	}
 
-	if (_data)
-	{
+	if (_data) {
 		::free(_data);
 		_data = nullptr;
 	}
@@ -164,47 +103,37 @@ void B25Decoder::decode(BYTE *pSrc, DWORD dwSrcSize, BYTE **ppDst, DWORD *pdwDst
 	buf.data = pSrc;
 	buf.size = dwSrcSize;
 	const int rc = _b25->put(_b25, &buf);
-	if (rc < 0)
-	{
-		if (rc >= ARIB_STD_B25_ERROR_NO_ECM_IN_HEAD_32M)
-		{
+	if (rc < 0) {
+		if (rc >= ARIB_STD_B25_ERROR_NO_ECM_IN_HEAD_32M) {
 			// pass through
 			_b25->release(_b25);
 			_b25 = nullptr;
 			_bcas->release(_bcas);
 			_bcas = nullptr;
-			if (*ppDst != pSrc)
-			{
+			if (*ppDst != pSrc) {
 				*ppDst = pSrc;
 				*pdwDstSize = dwSrcSize;
 			}
-		}
-		else
-		{
+		} else {
 			BYTE *p = nullptr;
 			_b25->withdraw(_b25, &buf);	// withdraw src buffer
 			if (buf.size > 0)
 				p = (BYTE *)::malloc(buf.size + dwSrcSize);
 
-			if (p)
-			{
+			if (p) {
 				::memcpy(p, buf.data, buf.size);
 				::memcpy(p + buf.size, pSrc, dwSrcSize);
 				*ppDst = p;
 				*pdwDstSize = buf.size + dwSrcSize;
 				_data = p;
-			}
-			else
-			{
-				if (*ppDst != pSrc)
-				{
+			} else {
+				if (*ppDst != pSrc) {
 					*ppDst = pSrc;
 					*pdwDstSize = dwSrcSize;
 				}
 			}
 
-			if (rc == ARIB_STD_B25_ERROR_ECM_PROC_FAILURE)
-			{
+			if (rc == ARIB_STD_B25_ERROR_ECM_PROC_FAILURE) {
 				// pass through
 				_b25->release(_b25);
 				_b25 = nullptr;
@@ -212,11 +141,7 @@ void B25Decoder::decode(BYTE *pSrc, DWORD dwSrcSize, BYTE **ppDst, DWORD *pdwDst
 				_bcas = nullptr;
 			}
 		}
-#if defined(_WIN32)
-		_errtime = ::GetTickCount();
-#else
-		clock_gettime(CLOCK_MONOTONIC_COARSE, &_errtime);
-#endif
+		_errtime = time(nullptr);
 		return;	// error
 	}
 	_b25->get(_b25, &buf);
@@ -225,10 +150,33 @@ void B25Decoder::decode(BYTE *pSrc, DWORD dwSrcSize, BYTE **ppDst, DWORD *pdwDst
 	return;	// success
 }
 
+int B25Decoder::set_strip(int32_t strip)
+{
+	int rc = 0;
+	if (_b25)
+		rc = _b25->set_strip(_b25, strip);
+	return rc;
+}
+
+int B25Decoder::set_emm_proc(int32_t on)
+{
+	int rc = 0;
+	if (_b25)
+		rc = _b25->set_emm_proc(_b25, on);
+	return rc;
+}
+
+int B25Decoder::set_multi2_round(int32_t round)
+{
+	int rc = 0;
+	if (_b25)
+		rc = _b25->set_multi2_round(_b25, round);
+	return rc;
+}
+
 int B25Decoder::reset()
 {
 	int rc = 0;
-	
 	if (_b25)
 		rc = _b25->reset(_b25);
 	return rc;
@@ -237,7 +185,6 @@ int B25Decoder::reset()
 int B25Decoder::flush()
 {
 	int rc = 0;
-	
 	if (_b25)
 		rc = _b25->flush(_b25);
 	return rc;
