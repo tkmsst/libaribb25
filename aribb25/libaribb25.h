@@ -1,10 +1,10 @@
 // libaribb25.h: CB25Decoder クラスのインターフェイス
 //
 //////////////////////////////////////////////////////////////////////
-
 #pragma once
 
 #include <windows.h>
+#include <ctime>
 #include <mutex>
 
 #include "IB25Decoder.h"
@@ -52,5 +52,5 @@ private:
 	B_CAS_CARD *_bcas;
 	ARIB_STD_B25 *_b25;
 	BYTE *_data;
-	DWORD _errtime;
+	time_t _errtime;
 };

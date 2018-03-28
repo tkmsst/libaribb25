@@ -5,7 +5,6 @@
 #define __B25DECODER_H__
 
 #include <ctime>
-#include <cstring>
 #include <mutex>
 
 #if defined(_WIN32)
@@ -13,7 +12,6 @@
 	#include "arib_std_b25.h"
 	#include "arib_std_b25_error_code.h"
 #else
-	#include <stdlib.h>
 	#include <aribb25/arib_std_b25.h>
 	#include <aribb25/arib_std_b25_error_code.h>
 	#include "typedef.h"

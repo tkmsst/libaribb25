@@ -1,7 +1,6 @@
 // libaribb25.cpp: CB25Decoder クラスのインプリメンテーション
 //
 //////////////////////////////////////////////////////////////////////
-
 #include "libaribb25.h"
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
@@ -45,9 +44,9 @@ __declspec(dllexport) IB25Decoder2 * CreateB25Decoder2()
 //////////////////////////////////////////////////////////////////////
 
 // 静的メンバ初期化
-CB25Decoder * CB25Decoder::m_pThis = NULL;
+CB25Decoder * CB25Decoder::m_pThis = nullptr;
 
-CB25Decoder::CB25Decoder(void) : _bcas(NULL), _b25(NULL), _data(NULL)
+CB25Decoder::CB25Decoder(void) : _bcas(nullptr), _b25(nullptr), _data(nullptr)
 {
 	m_pThis = this;
 }
@@ -57,7 +56,7 @@ CB25Decoder::~CB25Decoder(void)
 	if (_data)
 		::free(_data);
 
-	_mtx.lock();
+	std::lock_guard<std::mutex> lock(_mtx);
 
 	if (_b25)
 		_b25->release(_b25);
@@ -65,9 +64,7 @@ CB25Decoder::~CB25Decoder(void)
 	if (_bcas)
 		_bcas->release(_bcas);
 
-	_mtx.unlock();
-
-	m_pThis = NULL;
+	m_pThis = nullptr;
 }
 
 void CB25Decoder::Release()
@@ -78,16 +75,14 @@ void CB25Decoder::Release()
 
 const BOOL CB25Decoder::Initialize(DWORD dwRound)
 {
-	int ret = FALSE;
-
-	_mtx.lock();
+	std::lock_guard<std::mutex> lock(_mtx);
 
 	if (_b25)
-		goto unlock;
+		return Reset();
 
 	_bcas = create_b_cas_card();
 	if (!_bcas)
-		goto unlock;
+		return FALSE;
 
 	if (_bcas->init(_bcas) < 0)
 		goto err;
@@ -99,43 +94,32 @@ const BOOL CB25Decoder::Initialize(DWORD dwRound)
 	if (_b25->set_b_cas_card(_b25, _bcas) < 0)
 		goto err;
 
-	// success
 	_b25->set_strip(_b25, 1);
 	_b25->set_emm_proc(_b25, 0);
 	_b25->set_multi2_round(_b25, dwRound);
 
-	ret = TRUE;
-	goto unlock;
+	return TRUE;	// success
 
 err:
-	// error
-	if (_b25)
-	{
+	if (_b25) {
 		_b25->release(_b25);
-		_b25 = NULL;
+		_b25 = nullptr;
 	}
 
-	if (_bcas)
-	{
+	if (_bcas) {
 		_bcas->release(_bcas);
-		_bcas = NULL;
+		_bcas = nullptr;
 	}
 
-	_errtime = ::GetTickCount();
-
-unlock:
-	_mtx.unlock();
-
-	return ret;
+	_errtime = time(nullptr);
+	return FALSE;	// error
 }
 
 const BOOL CB25Decoder::Decode(BYTE *pSrcBuf, const DWORD dwSrcSize, BYTE **ppDstBuf, DWORD *pdwDstSize)
 {
-	if (!_b25)
-	{
-		DWORD now = ::GetTickCount();
-		DWORD interval = (now - _errtime) / 1000;
-		if (interval > RETRY_INTERVAL) {
+	if (!_b25) {
+		time_t now = time(nullptr);
+		if (difftime(now, _errtime) > RETRY_INTERVAL) {
 			if (Initialize() < 0)
 				_errtime = now;
 		}
@@ -151,7 +135,7 @@ const BOOL CB25Decoder::Decode(BYTE *pSrcBuf, const DWORD dwSrcSize, BYTE **ppDs
 
 	if (_data) {
 		::free(_data);
-		_data = NULL;
+		_data = nullptr;
 	}
 
 	ARIB_STD_B25_BUFFER buf;
@@ -162,15 +146,15 @@ const BOOL CB25Decoder::Decode(BYTE *pSrcBuf, const DWORD dwSrcSize, BYTE **ppDs
 		if (rc >= ARIB_STD_B25_ERROR_NO_ECM_IN_HEAD_32M) {
 			// pass through
 			_b25->release(_b25);
-			_b25 = NULL;
+			_b25 = nullptr;
 			_bcas->release(_bcas);
-			_bcas = NULL;
+			_bcas = nullptr;
 			if (*ppDstBuf != pSrcBuf) {
 				*ppDstBuf = pSrcBuf;
 				*pdwDstSize = dwSrcSize;
 			}
 		} else {
-			BYTE *p = NULL;
+			BYTE *p = nullptr;
 			_b25->withdraw(_b25, &buf);	// withdraw src buffer
 			if (buf.size > 0)
 				p = (BYTE *)::malloc(buf.size + dwSrcSize);
@@ -191,12 +175,12 @@ const BOOL CB25Decoder::Decode(BYTE *pSrcBuf, const DWORD dwSrcSize, BYTE **ppDs
 			if (rc == ARIB_STD_B25_ERROR_ECM_PROC_FAILURE) {
 				// pass through
 				_b25->release(_b25);
-				_b25 = NULL;
+				_b25 = nullptr;
 				_bcas->release(_bcas);
-				_bcas = NULL;
+				_bcas = nullptr;
 			}
 		}
-		_errtime = ::GetTickCount();
+		_errtime = time(nullptr);
 		return FALSE;	// error
 	}
 	_b25->get(_b25, &buf);
@@ -214,7 +198,7 @@ const BOOL CB25Decoder::Flush(BYTE **ppDstBuf, DWORD *pdwDstSize)
 		ret = (rc < 0) ? FALSE : TRUE;
 	}
 
-	*ppDstBuf = NULL;
+	*ppDstBuf = nullptr;
 	*pdwDstSize = 0;
 
 	return ret;
