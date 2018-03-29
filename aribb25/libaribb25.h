@@ -16,13 +16,6 @@
 class CB25Decoder : public IB25Decoder2
 {
 public:
-// CB25Decoder
-	CB25Decoder(void);
-	virtual ~CB25Decoder(void);
-	void Release(void);
-
-	static CB25Decoder *m_pThis;
-
 // IB25Decoder
 	virtual const BOOL Initialize(DWORD dwRound = 4);
 	virtual const BOOL Decode(BYTE *pSrcBuf, const DWORD dwSrcSize, BYTE **ppDstBuf, DWORD *pdwDstSize);
@@ -47,10 +40,17 @@ public:
 	virtual const DWORD GetEcmProcessNum(void);
 	virtual const DWORD GetEmmProcessNum(void);
 
+// CB25Decoder
+	CB25Decoder(void);
+	virtual ~CB25Decoder(void);
+	void Release(void);
+	static CB25Decoder *m_pThis;
+
 private:
 	std::mutex _mtx;
 	B_CAS_CARD *_bcas;
 	ARIB_STD_B25 *_b25;
 	BYTE *_data;
 	time_t _errtime;
+	BOOL discard_scramble = TRUE;
 };

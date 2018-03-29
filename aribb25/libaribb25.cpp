@@ -53,6 +53,12 @@ CB25Decoder::CB25Decoder(void) : _bcas(nullptr), _b25(nullptr), _data(nullptr)
 
 CB25Decoder::~CB25Decoder(void)
 {
+	m_pThis = nullptr;
+}
+
+void CB25Decoder::Release()
+{
+	// インスタンス開放
 	if (_data)
 		::free(_data);
 
@@ -64,12 +70,6 @@ CB25Decoder::~CB25Decoder(void)
 	if (_bcas)
 		_bcas->release(_bcas);
 
-	m_pThis = nullptr;
-}
-
-void CB25Decoder::Release()
-{
-	// インスタンス開放
 	delete this;
 }
 
@@ -95,7 +95,7 @@ const BOOL CB25Decoder::Initialize(DWORD dwRound)
 		goto err;
 
 	_b25->set_strip(_b25, 1);
-	_b25->set_emm_proc(_b25, 0);
+	_b25->set_emm_proc(_b25, 1);
 	_b25->set_multi2_round(_b25, dwRound);
 
 	return TRUE;	// success
@@ -117,6 +117,13 @@ err:
 
 const BOOL CB25Decoder::Decode(BYTE *pSrcBuf, const DWORD dwSrcSize, BYTE **ppDstBuf, DWORD *pdwDstSize)
 {
+	if (!pSrcBuf || !dwSrcSize || !ppDstBuf || !pdwDstSize) {
+		// 引数が不正
+		return FALSE;
+	}
+
+	std::lock_guard<std::mutex> lock(_mtx);
+
 	if (!_b25) {
 		time_t now = time(nullptr);
 		if (difftime(now, _errtime) > RETRY_INTERVAL) {
@@ -142,7 +149,18 @@ const BOOL CB25Decoder::Decode(BYTE *pSrcBuf, const DWORD dwSrcSize, BYTE **ppDs
 	buf.data = pSrcBuf;
 	buf.size = dwSrcSize;
 	const int rc = _b25->put(_b25, &buf);
-	if (rc < 0) {
+	if (rc > 0) {
+		if (discard_scramble) {
+			*ppDstBuf = nullptr;
+			*pdwDstSize = 0;
+		} else {
+			if (*ppDstBuf != pSrcBuf) {
+				*ppDstBuf = pSrcBuf;
+				*pdwDstSize = dwSrcSize;
+			}
+		}
+		return TRUE;
+	} else if (rc < 0) {
 		if (rc >= ARIB_STD_B25_ERROR_NO_ECM_IN_HEAD_32M) {
 			// pass through
 			_b25->release(_b25);
@@ -208,6 +226,8 @@ const BOOL CB25Decoder::Reset(void)
 {
 	BOOL ret = TRUE;
 	
+	std::lock_guard<std::mutex> lock(_mtx);
+
 	if (_b25) {
 		int rc = _b25->reset(_b25);
 		ret = (rc < 0) ? FALSE : TRUE;
@@ -224,6 +244,8 @@ void CB25Decoder::DiscardNullPacket(const bool bEnable)
 
 void CB25Decoder::DiscardScramblePacket(const bool bEnable)
 {
+	// 復号漏れパケット破棄の有無を設定
+	discard_scramble = bEnable;
 }
 
 void CB25Decoder::EnableEmmProcess(const bool bEnable)

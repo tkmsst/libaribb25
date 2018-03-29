@@ -929,7 +929,7 @@ static int put_arib_std_b25(void *std_b25, ARIB_STD_B25_BUFFER *buf)
 		if(prv->p_count < 1){
 			if(prv->sbuf_offset < (16*1024*1024)){
 				/* need more data */
-				return 0;
+				return ARIB_STD_B25_WARN_PAT_NOT_COMPLETE;
 			}else{
 				/* exceed sbuf limit */
 				return ARIB_STD_B25_ERROR_NO_PAT_IN_HEAD_16M;
@@ -946,7 +946,7 @@ static int put_arib_std_b25(void *std_b25, ARIB_STD_B25_BUFFER *buf)
 		if(!check_pmt_complete(prv)){
 			if(prv->sbuf_offset < (32*1024*1024)){
 				/* need more data */
-				return 0;
+				return ARIB_STD_B25_WARN_PMT_NOT_COMPLETE;
 			}else{
 				/* exceed sbuf limit */
 				return ARIB_STD_B25_ERROR_NO_PMT_IN_HEAD_32M;
@@ -963,7 +963,7 @@ static int put_arib_std_b25(void *std_b25, ARIB_STD_B25_BUFFER *buf)
 		if(!check_ecm_complete(prv)){
 			if(prv->sbuf_offset < (32*1024*1024)){
 				/* need more data */
-				return 0;
+				return ARIB_STD_B25_WARN_ECM_NOT_COMPLETE;
 			}else{
 				/* exceed sbuf limit */
 				return ARIB_STD_B25_ERROR_NO_ECM_IN_HEAD_32M;
