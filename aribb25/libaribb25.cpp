@@ -26,15 +26,13 @@ extern "C"
 __declspec(dllexport) IB25Decoder * CreateB25Decoder()
 {
 	// インスタンス生成
-	return (CB25Decoder::m_pThis) ?
-		CB25Decoder::m_pThis : dynamic_cast<IB25Decoder *>(new CB25Decoder());
+		return dynamic_cast<IB25Decoder *>(new CB25Decoder());
 }
 
 __declspec(dllexport) IB25Decoder2 * CreateB25Decoder2()
 {
 	// インスタンス生成
-	return (CB25Decoder::m_pThis) ?
-		CB25Decoder::m_pThis : dynamic_cast<IB25Decoder2 *>(new CB25Decoder());
+		return dynamic_cast<IB25Decoder2 *>(new CB25Decoder());
 }
 
 }
@@ -121,8 +119,6 @@ const BOOL CB25Decoder::Decode(BYTE *pSrcBuf, const DWORD dwSrcSize, BYTE **ppDs
 		// 引数が不正
 		return FALSE;
 	}
-
-	std::lock_guard<std::mutex> lock(_mtx);
 
 	if (!_b25) {
 		time_t now = time(nullptr);
@@ -226,8 +222,6 @@ const BOOL CB25Decoder::Reset(void)
 {
 	BOOL ret = TRUE;
 	
-	std::lock_guard<std::mutex> lock(_mtx);
-
 	if (_b25) {
 		int rc = _b25->reset(_b25);
 		ret = (rc < 0) ? FALSE : TRUE;
