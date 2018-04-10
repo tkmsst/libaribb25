@@ -13,16 +13,7 @@ B25Decoder::B25Decoder() : _bcas(nullptr), _b25(nullptr), _data(nullptr)
 
 B25Decoder::~B25Decoder()
 {
-	if (_data)
-		::free(_data);
-
-	std::lock_guard<std::mutex> lock(_mtx);
-
-	if (_b25)
-		_b25->release(_b25);
-
-	if (_bcas)
-		_bcas->release(_bcas);
+	release();
 }
 
 int B25Decoder::init()
@@ -74,6 +65,26 @@ err:
 
 	_errtime = time(nullptr);
 	return rc;	// error
+}
+
+void B25Decoder::release()
+{
+	if (_data) {
+		::free(_data);
+		_data = nullptr;
+	}
+
+	std::lock_guard<std::mutex> lock(_mtx);
+
+	if (_b25) {
+		_b25->release(_b25);
+		_b25 = nullptr;
+	}
+
+	if (_bcas) {
+		_bcas->release(_bcas);
+		_bcas = nullptr;
+	}
 }
 
 void B25Decoder::decode(BYTE *pSrc, DWORD dwSrcSize, BYTE **ppDst, DWORD *pdwDstSize)
