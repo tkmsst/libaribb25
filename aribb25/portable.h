@@ -21,15 +21,6 @@
 #define _S_IREAD      (S_IRUSR|S_IRGRP|S_IROTH)
 #define _S_IWRITE     (S_IWUSR|S_IWGRP|S_IWOTH)
 
-typedef unsigned char     uint8_t;
-typedef   signed char      int8_t;
-typedef unsigned short   uint16_t;
-typedef   signed short    int16_t;
-typedef unsigned int     uint32_t;
-typedef   signed int      int32_t;
-typedef unsigned __int64 uint64_t;
-typedef   signed __int64  int64_t;
-
 #endif
 
 #endif /* PORTABLE_H */
