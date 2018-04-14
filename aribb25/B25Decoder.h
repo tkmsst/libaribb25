@@ -32,6 +32,7 @@ public:
 	int set_strip(int32_t strip);
 	int set_emm_proc(int32_t on);
 	int set_multi2_round(int32_t round);
+	int set_unit_size(int size);
 	int reset();
 	int flush();
 	int put(BYTE *pSrc, DWORD dwSrcSize);

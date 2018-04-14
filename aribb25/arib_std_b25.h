@@ -35,6 +35,8 @@ typedef struct {
 
 	int (* set_b_cas_card)(void *std_b25, B_CAS_CARD *bcas);
 
+	int (* set_unit_size)(void *std_b25, int size);
+
 	int (* reset)(void *std_b25);
 	int (* flush)(void *std_b25);
 

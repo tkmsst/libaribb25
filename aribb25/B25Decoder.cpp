@@ -185,6 +185,14 @@ int B25Decoder::set_multi2_round(int32_t round)
 	return rc;
 }
 
+int B25Decoder::set_unit_size(int size)
+{
+	int rc = 0;
+	if (_b25)
+		rc = _b25->set_unit_size(_b25, size);
+	return rc;
+}
+
 int B25Decoder::reset()
 {
 	int rc = 0;

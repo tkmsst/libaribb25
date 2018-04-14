@@ -6,6 +6,7 @@
 
 #include <math.h>
 
+#include <winscard.h>
 #if defined(_WIN32)
 	#include <windows.h>
 	#include <tchar.h>
@@ -13,7 +14,6 @@
 	#define TCHAR char
 	#define _tcslen strlen
 #endif
-#include <winscard.h>
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  inner structures

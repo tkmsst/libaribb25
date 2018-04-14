@@ -1,4 +1,4 @@
-#define VERSION_STRING "0.2.6"
+#define VERSION_STRING "0.2.7"
 
 #if defined(_WIN32)
 #define _CRT_SECURE_NO_WARNINGS

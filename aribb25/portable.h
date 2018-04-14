@@ -2,7 +2,6 @@
 #define PORTABLE_H
 
 #include <stdint.h>
-#include <inttypes.h>
 
 #if !defined(_WIN32)
 

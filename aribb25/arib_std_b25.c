@@ -316,6 +316,7 @@ static int set_multi2_round_arib_std_b25(void *std_b25, int32_t round);
 static int set_strip_arib_std_b25(void *std_b25, int32_t strip);
 static int set_emm_proc_arib_std_b25(void *std_b25, int32_t on);
 static int set_b_cas_card_arib_std_b25(void *std_b25, B_CAS_CARD *bcas);
+static int set_unit_size_arib_std_b25(void *std_b25, int size);
 static int reset_arib_std_b25(void *std_b25);
 static int flush_arib_std_b25(void *std_b25);
 static int put_arib_std_b25(void *std_b25, ARIB_STD_B25_BUFFER *buf);
@@ -352,6 +353,7 @@ ARIB_STD_B25 *create_arib_std_b25(void)
 	r->set_strip = set_strip_arib_std_b25;
 	r->set_emm_proc = set_emm_proc_arib_std_b25;
 	r->set_b_cas_card = set_b_cas_card_arib_std_b25;
+	r->set_unit_size = set_unit_size_arib_std_b25;
 	r->reset = reset_arib_std_b25;
 	r->flush = flush_arib_std_b25;
 	r->put = put_arib_std_b25;
@@ -410,8 +412,6 @@ static void extract_emm_fixed_part(EMM_FIXED_PART *dst, uint8_t *src);
 
 static uint8_t *resync(uint8_t *head, uint8_t *tail, int32_t unit);
 static uint8_t *resync_force(uint8_t *head, uint8_t *tail, int32_t unit);
-
-/* static uint32_t crc32(uint8_t *head, uint8_t *tail); */
 
 /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  interface method implementation
@@ -1138,6 +1138,20 @@ static void teardown(ARIB_STD_B25_PRIVATE_DATA *prv)
 
 	release_work_buffer(&(prv->sbuf));
 	release_work_buffer(&(prv->dbuf));
+}
+
+static int set_unit_size_arib_std_b25(void *std_b25, int size)
+{
+	ARIB_STD_B25_PRIVATE_DATA *prv;
+
+	prv = private_data(std_b25);
+	if (prv == NULL || size < 188 || size > 320) {
+		return ARIB_STD_B25_ERROR_INVALID_PARAM;
+	}
+
+	prv->unit_size = size;
+
+	return 0;
 }
 
 static int select_unit_size(ARIB_STD_B25_PRIVATE_DATA *prv)
