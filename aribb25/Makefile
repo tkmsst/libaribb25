@@ -12,9 +12,9 @@ PCSC_LDLIBS ?= `pkg-config libpcsclite --libs`
 
 CC     = gcc
 CXX    = g++
-CFLAGS = -O2 -g -fPIC -Wall $(PCSC_CFLAGS) -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
+CFLAGS = -O2 -fPIC -Wall $(PCSC_CFLAGS) -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
 
-LIBS   = $(PCSC_LDLIBS) -lm
+LIBS   = $(PCSC_LDLIBS)
 LDFLAGS =
 
 OBJS  = arib_std_b25.o b_cas_card.o multi2.o ts_section_parser.o
