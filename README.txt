@@ -4,7 +4,7 @@
 
 【バージョン】
 
-　0.2.6
+　0.2.7
 
 【オリジナル作者】
 
@@ -71,12 +71,12 @@
 
 【バイナリの構成】
 
-　・b25.exe
+　・b25.exe / b25
 　　ARIB STD-B25 記載の処理を行うためのプログラム
 
-　・libaribb25.dll
-　　MULTI2 復号処理を行う DLL
-　　B25Decoder.dll と互換性がある
+　・libaribb25.dll / libaribb25.so
+　　MULTI2 復号処理を行うライブラリ
+　　libaribb25.dll は B25Decoder.dll と互換性がある
 
 【プログラムの構成】
 
@@ -112,6 +112,12 @@
 
 　　ARIB STD-B25 では MULTI2 のラウンド数は非公開パラメータだが
 　　総当たりで実際のラウンド数は推定可能である
+
+【コンパイルの手順（debian）】
+
+　　$ sudo apt-get install pkg-config libpcsclite-dev
+    $ make
+    $ make install
 
 【処理の流れ】
 

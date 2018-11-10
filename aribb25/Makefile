@@ -40,7 +40,7 @@ $(DEPEND):
 	$(CC) -fPIC -MM $(OBJS:.o=.c) td.c > $@
 
 install: $(TARGET) install-headers
-	install -m755 b25 $(PREFIX)/bin
+	install -m755 $(TARGET_APP) $(PREFIX)/bin
 	install -m755 $(TARGET_LIB) $(PREFIX)/lib/$(TARGET_LIB).$(VER)
 	ln -sf $(PREFIX)/lib/$(TARGET_LIB).$(VER) $(PREFIX)/lib/$(TARGET_LIB).$(MAJOR)
 	ln -sf $(PREFIX)/lib/$(TARGET_LIB).$(MAJOR) $(PREFIX)/lib/$(TARGET_LIB)
@@ -49,5 +49,9 @@ install: $(TARGET) install-headers
 install-headers:
 	mkdir -p $(DEST_HEADER)
 	install -m644 $(HEADERS) $(DEST_HEADER)
+
+uninstall:
+	rm -f $(PREFIX)/bin/$(TARGET_APP)
+	rm -f $(PREFIX)/lib/libaribb25.*
 
 -include $(DEPEND)

@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -25,7 +26,6 @@
 	#define _ttoi atoi
 	#define _tmain main
 	#define _topen _open
-	#include <inttypes.h>
 	#include <unistd.h>
 	#include <sys/time.h>
 #endif
@@ -50,7 +50,7 @@ int _tmain(int argc, TCHAR **argv)
 {
 	int n;
 	OPTION opt;
-	
+
 	#if defined(_WIN32)
 	_CrtSetReportMode( _CRT_WARN, _CRTDBG_MODE_FILE );
 	_CrtSetReportFile( _CRT_WARN, _CRTDBG_FILE_STDOUT );
@@ -70,7 +70,7 @@ int _tmain(int argc, TCHAR **argv)
 	for(;n<=(argc-2);n+=2){
 		test_arib_std_b25(argv[n+0], argv[n+1], &opt);
 	}
-	
+
 	#if defined(_WIN32)
 	_CrtDumpMemoryLeaks();
 	#endif
@@ -102,7 +102,7 @@ static void show_usage()
 static int parse_arg(OPTION *dst, int argc, TCHAR **argv)
 {
 	int i;
-	
+
 	dst->round = 4;
 	dst->strip = 0;
 	dst->emm = 0;
@@ -198,7 +198,7 @@ static void test_arib_std_b25(const TCHAR *src, const TCHAR *dst, OPTION *opt)
 		_ftprintf(stderr, _T("error - failed on _open(%s) [src]\n"), src);
 		goto LAST;
 	}
-	
+
 	_lseeki64(sfd, 0, SEEK_END);
 	total = _telli64(sfd);
 	_lseeki64(sfd, 0, SEEK_SET);
@@ -280,7 +280,7 @@ static void test_arib_std_b25(const TCHAR *src, const TCHAR *dst, OPTION *opt)
 				goto LAST;
 			}
 		}
-		
+
 		offset += sbuf.size;
 		if(opt->verbose != 0){
 			m = (int)(10000*offset/total);
@@ -311,7 +311,7 @@ static void test_arib_std_b25(const TCHAR *src, const TCHAR *dst, OPTION *opt)
 		_ftprintf(stderr, _T("error - failed on ARIB_STD_B25::flush() : code=%d\n"), code);
 		goto LAST;
 	}
-	
+
 	code = b25->get(b25, &dbuf);
 	if(code < 0){
 		_ftprintf(stderr, _T("error - failed on ARIB_STD_B25::get() : code=%d\n"), code);
@@ -366,13 +366,8 @@ static void test_arib_std_b25(const TCHAR *src, const TCHAR *dst, OPTION *opt)
 			_ftprintf(stderr, _T("  channel:               %d\n"), pgrm.program_number);
 			_ftprintf(stderr, _T("  unpurchased ECM count: %d\n"), pgrm.ecm_unpurchased_count);
 			_ftprintf(stderr, _T("  last ECM error code:   %04x\n"), pgrm.last_ecm_error_code);
-			#if defined(_WIN32)
-			_ftprintf(stderr, _T("  undecrypted TS packet: %I64d\n"), pgrm.undecrypted_packet_count);
-			_ftprintf(stderr, _T("  total TS packet:       %I64d\n"), pgrm.total_packet_count);
-			#else
-			_ftprintf(stderr, _T("  undecrypted TS packet: %"PRId64"\n"), pgrm.undecrypted_packet_count);
-			_ftprintf(stderr, _T("  total TS packet:       %"PRId64"\n"), pgrm.total_packet_count);
-			#endif
+			_ftprintf(stderr, _T("  undecrypted TS packet: %" PRId64 "\n"), pgrm.undecrypted_packet_count);
+			_ftprintf(stderr, _T("  total TS packet:       %" PRId64 "\n"), pgrm.total_packet_count);
 		}
 	}
 

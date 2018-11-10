@@ -6,3 +6,6 @@ clean:
 
 install:
 	cd aribb25; make install
+
+uninstall:
+	cd aribb25; make uninstall
