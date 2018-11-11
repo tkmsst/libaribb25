@@ -31,6 +31,7 @@
 #endif
 
 #include "arib_std_b25.h"
+#include "arib_std_b25_error_code.h"
 #include "b_cas_card.h"
 
 typedef struct {
@@ -184,6 +185,7 @@ static void test_arib_std_b25(const TCHAR *src, const TCHAR *dst, OPTION *opt)
 	ARIB_STD_B25_PROGRAM_INFO pgrm;
 
 	uint8_t data[64*1024];
+	uint8_t *_data;
 
 	ARIB_STD_B25_BUFFER sbuf;
 	ARIB_STD_B25_BUFFER dbuf;
@@ -192,6 +194,7 @@ static void test_arib_std_b25(const TCHAR *src, const TCHAR *dst, OPTION *opt)
 	dfd = -1;
 	b25 = NULL;
 	bcas = NULL;
+	_data = NULL;
 
 	sfd = _topen(src, _O_BINARY|_O_RDONLY|_O_SEQUENTIAL);
 	if(sfd < 0){
@@ -264,13 +267,32 @@ static void test_arib_std_b25(const TCHAR *src, const TCHAR *dst, OPTION *opt)
 		code = b25->put(b25, &sbuf);
 		if(code < 0){
 			_ftprintf(stderr, _T("error - failed on ARIB_STD_B25::put() : code=%d\n"), code);
-			goto LAST;
-		}
-
-		code = b25->get(b25, &dbuf);
-		if(code < 0){
-			_ftprintf(stderr, _T("error - failed on ARIB_STD_B25::get() : code=%d\n"), code);
-			goto LAST;
+			dbuf.data = data;
+			dbuf.size = n;
+			if(code < ARIB_STD_B25_ERROR_NO_ECM_IN_HEAD_32M){
+				uint8_t *p = NULL;
+				b25->withdraw(b25, &sbuf);
+				if(sbuf.size > 0){
+					if(_data != NULL){
+						free(_data);
+						_data = NULL;
+					}
+					p = (uint8_t *)malloc(sbuf.size + n);
+				}
+				if(p != NULL){
+					memcpy(p, sbuf.data, sbuf.size);
+					memcpy(p + sbuf.size, data, n);
+					dbuf.data = p;
+					dbuf.size = sbuf.size + n;
+					_data = p;
+				}
+			}
+		}else{
+			code = b25->get(b25, &dbuf);
+			if(code < 0){
+				_ftprintf(stderr, _T("error - failed on ARIB_STD_B25::get() : code=%d\n"), code);
+				goto LAST;
+			}
 		}
 
 		if(dbuf.size > 0){
@@ -330,7 +352,7 @@ static void test_arib_std_b25(const TCHAR *src, const TCHAR *dst, OPTION *opt)
 		mbps = 0.0;
 #if defined(_WIN32)
 		tick = GetTickCount();
-		if (tick-tock > 100) {
+		if(tick-tock > 100){
 			mbps = offset;
 			mbps /= 1024;
 			mbps /= (tick-tock);
@@ -339,7 +361,7 @@ static void test_arib_std_b25(const TCHAR *src, const TCHAR *dst, OPTION *opt)
 		gettimeofday(&tick, NULL);
 		millisec = (tick.tv_sec - tock.tv_sec) * 1000;
 		millisec += (tick.tv_usec - tock.tv_usec) / 1000;
-		if(millisec > 100.0) {
+		if(millisec > 100.0){
 			mbps = offset;
 			mbps /= 1024;
 			mbps /= millisec;
@@ -376,6 +398,11 @@ static void test_arib_std_b25(const TCHAR *src, const TCHAR *dst, OPTION *opt)
 	}
 
 LAST:
+
+	if(_data != NULL){
+		free(_data);
+		_data = NULL;
+	}
 
 	if(sfd >= 0){
 		_close(sfd);
