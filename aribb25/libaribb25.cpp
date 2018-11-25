@@ -145,17 +145,12 @@ const BOOL CB25Decoder::Decode(BYTE *pSrcBuf, const DWORD dwSrcSize, BYTE **ppDs
 	buf.data = pSrcBuf;
 	buf.size = dwSrcSize;
 	const int rc = _b25->put(_b25, &buf);
-	if (rc > 0) {
-		if (discard_scramble) {
-			*ppDstBuf = nullptr;
-			*pdwDstSize = 0;
-		} else {
-			if (*ppDstBuf != pSrcBuf) {
-				*ppDstBuf = pSrcBuf;
-				*pdwDstSize = dwSrcSize;
-			}
+	if (rc == ARIB_STD_B25_WARN_PAT_NOT_COMPLETE) {
+		if (*ppDstBuf != pSrcBuf) {
+			*ppDstBuf = pSrcBuf;
+			*pdwDstSize = dwSrcSize;
 		}
-		return TRUE;
+		return TRUE;	// success
 	} else if (rc < 0) {
 		if (rc >= ARIB_STD_B25_ERROR_NO_ECM_IN_HEAD_32M) {
 			// pass through
@@ -239,7 +234,6 @@ void CB25Decoder::DiscardNullPacket(const bool bEnable)
 void CB25Decoder::DiscardScramblePacket(const bool bEnable)
 {
 	// 復号漏れパケット破棄の有無を設定
-	discard_scramble = bEnable;
 }
 
 void CB25Decoder::EnableEmmProcess(const bool bEnable)

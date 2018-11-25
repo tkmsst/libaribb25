@@ -52,5 +52,4 @@ private:
 	ARIB_STD_B25 *_b25;
 	BYTE *_data;
 	time_t _errtime;
-	BOOL discard_scramble = TRUE;
 };
